@@ -1,6 +1,7 @@
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { Panel, Pill } from "./SaltControls";
 import { useSalt } from "./SaltProvider";
+import { YieldCanvas } from "./YieldCanvas";
 import {
   ASSET_CLASSES,
   HOLDINGS,
@@ -308,6 +309,7 @@ export function LiveCanvas() {
         </div>
       </div>
 
+      <YieldCanvas />
       <KpiRow />
       <div className="grid gap-[var(--salt-spacing-200)] xl:grid-cols-[1.4fr_1fr]">
         <AllocationDonut />

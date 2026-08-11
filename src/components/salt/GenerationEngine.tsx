@@ -43,7 +43,7 @@ function AuditRow({
 
 export function GenerationEngine() {
   const el = useProviderEl();
-  const { density, theme, mode, setDensity, setTheme } = useSalt();
+  const { density, theme, mode, setDensity, setTheme, setCanvas } = useSalt();
   const [tab, setTab] = useState<Tab>("form");
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
   const [spec, setSpec] = useState(() =>
@@ -58,6 +58,13 @@ export function GenerationEngine() {
       return {};
     }
   }, [spec]);
+
+  useEffect(() => {
+    if (result.ok && Array.isArray(parsed.assetClasses) && parsed.assetClasses.length) {
+      setCanvas(parsed as SaltUiSpec, prompt);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result.ok, parsed]);
 
   const [contrast, setContrast] = useState<
     { label: string; ratio: number | null; grade: string }[]
