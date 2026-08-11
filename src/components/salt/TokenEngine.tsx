@@ -434,10 +434,10 @@ export function TokenEngineSidebar() {
         ]}
       />
 
-      <AstCompiler />
+      <GenerationEngine />
       <TokenDictionary />
-      <SchemaValidator />
       <ContrastInspector />
+
     </aside>
   );
 }
