@@ -295,10 +295,10 @@ export function LiveCanvas() {
       <div className="flex flex-wrap items-end justify-between gap-[var(--salt-spacing-100)]">
         <div>
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-salt-content-tertiary">
-            Wealth Advisor Live Canvas
+            Private Wealth Client Live Meeting Canvas
           </p>
           <h2 className="font-semibold text-salt-content-primary [font-size:var(--salt-text-h1-fontSize)]">
-            Thornbury Family Office · Discretionary Mandate
+            Private Wealth Client Live Meeting Canvas — Ad-Hoc Portfolio Analysis
           </h2>
         </div>
         <div className="flex flex-wrap gap-[var(--salt-spacing-50)]">
@@ -308,6 +308,37 @@ export function LiveCanvas() {
           <Pill tone={vision === "standard" ? "neutral" : "warning"}>{vision}</Pill>
         </div>
       </div>
+
+      <section
+        aria-label="Executive meeting context"
+        className="grid gap-[var(--salt-spacing-100)] rounded-[var(--salt-control-borderRadius)] border border-salt-container-border bg-salt-container-primary p-[var(--salt-spacing-200)] md:grid-cols-3"
+      >
+        {[
+          {
+            label: "Active Client Profile",
+            value: "Ultra-High-Net-Worth (UHNW) Portfolio",
+          },
+          {
+            label: "Mandate Compliance",
+            value: "Enforced via Salt Design System Tokens & Risk Engine Schema",
+          },
+          {
+            label: "Execution Latency",
+            value: "< 2ms AST Validation Boundary",
+          },
+        ].map((item) => (
+          <div key={item.label}>
+            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-salt-content-tertiary">
+              {item.label}
+            </p>
+            <p className="mt-[var(--salt-spacing-50)] text-[0.78rem] font-semibold text-salt-content-primary">
+              {item.value}
+            </p>
+          </div>
+        ))}
+      </section>
+
+
 
       <YieldCanvas />
       <KpiRow />
