@@ -108,7 +108,7 @@ function AllocationDonut() {
           </text>
         </svg>
 
-        <ul className="min-w-52 flex-1 flex-col gap-[var(--salt-spacing-50)]">
+        <ul className="flex min-w-52 flex-1 flex-col gap-[var(--salt-spacing-50)]">
           {ASSET_CLASSES.map((a) => (
             <li
               key={a.id}
