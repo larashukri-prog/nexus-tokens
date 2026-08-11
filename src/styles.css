@@ -142,3 +142,249 @@
     color: var(--color-foreground);
   }
 }
+
+/* ================================================================
+ * SALT DESIGN SYSTEM — 3-TIER TOKEN MODEL
+ * Tier 1 Primitives  -> --salt-palette-*
+ * Tier 2 Semantic    -> --salt-content-*, --salt-container-*, --salt-status-*
+ * Tier 3 Component   -> --salt-card-*, --salt-table-*, --salt-control-*
+ * Never author raw hex in components. Tokens only.
+ * ================================================================ */
+
+@theme inline {
+  --font-salt: "Open Sans", "Amplitude", ui-sans-serif, system-ui, sans-serif;
+  --font-salt-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --color-salt-container-primary: var(--salt-container-primary-background);
+  --color-salt-container-secondary: var(--salt-container-secondary-background);
+  --color-salt-container-tertiary: var(--salt-container-tertiary-background);
+  --color-salt-container-border: var(--salt-container-primary-border);
+  --color-salt-content-primary: var(--salt-content-primary-foreground);
+  --color-salt-content-secondary: var(--salt-content-secondary-foreground);
+  --color-salt-content-tertiary: var(--salt-content-tertiary-foreground);
+  --color-salt-accent: var(--salt-sentiment-accent-foreground);
+  --color-salt-info: var(--salt-status-info-foreground);
+  --color-salt-success: var(--salt-status-success-foreground);
+  --color-salt-warning: var(--salt-status-warning-foreground);
+  --color-salt-error: var(--salt-status-error-foreground);
+  --color-salt-positive: var(--salt-sentiment-positive-foreground);
+  --color-salt-negative: var(--salt-sentiment-negative-foreground);
+  --color-salt-actionable: var(--salt-actionable-primary-background);
+  --color-salt-actionable-fg: var(--salt-actionable-primary-foreground);
+  --color-salt-cat-1: var(--salt-palette-categorical-1);
+  --color-salt-cat-2: var(--salt-palette-categorical-2);
+  --color-salt-cat-3: var(--salt-palette-categorical-3);
+  --color-salt-cat-4: var(--salt-palette-categorical-4);
+  --color-salt-cat-5: var(--salt-palette-categorical-5);
+  --color-salt-cat-6: var(--salt-palette-categorical-6);
+}
+
+/* ---------- Tier 1: primitives (theme-scoped) ---------- */
+[data-salt-provider] {
+  /* JPM Brand primitives */
+  --salt-palette-navy-900: oklch(0.19 0.045 258);
+  --salt-palette-navy-800: oklch(0.24 0.05 258);
+  --salt-palette-navy-700: oklch(0.3 0.055 258);
+  --salt-palette-navy-500: oklch(0.44 0.07 256);
+  --salt-palette-slate-100: oklch(0.97 0.005 250);
+  --salt-palette-slate-200: oklch(0.93 0.008 250);
+  --salt-palette-slate-300: oklch(0.86 0.01 250);
+  --salt-palette-slate-500: oklch(0.55 0.02 252);
+  --salt-palette-white: oklch(1 0 0);
+  --salt-palette-blue-500: oklch(0.55 0.14 250);
+  --salt-palette-teal-500: oklch(0.62 0.1 200);
+  --salt-palette-green-600: oklch(0.55 0.13 155);
+  --salt-palette-amber-600: oklch(0.68 0.14 75);
+  --salt-palette-red-600: oklch(0.53 0.19 26);
+
+  /* Tier 3: component tokens */
+  --salt-card-borderRadius: 2px;
+  --salt-card-borderStyle: solid;
+  --salt-card-borderWidth: 1px;
+  --salt-control-borderRadius: 2px;
+  --salt-table-headerBackground: var(--salt-container-tertiary-background);
+  --salt-table-rowSeparator: var(--salt-container-primary-border);
+  --salt-focused-outline: 2px solid var(--salt-status-info-foreground);
+  --salt-typography-fontFamily: var(--font-salt);
+}
+
+/* ---------- Tier 2: semantic — JPM Brand / Light ---------- */
+[data-salt-provider][data-theme="jpm"][data-mode="light"] {
+  --salt-container-primary-background: var(--salt-palette-white);
+  --salt-container-secondary-background: var(--salt-palette-slate-100);
+  --salt-container-tertiary-background: var(--salt-palette-slate-200);
+  --salt-container-primary-border: var(--salt-palette-slate-300);
+  --salt-content-primary-foreground: oklch(0.17 0.03 258);
+  --salt-content-secondary-foreground: oklch(0.36 0.02 255);
+  --salt-content-tertiary-foreground: oklch(0.46 0.015 255);
+  --salt-sentiment-accent-foreground: oklch(0.32 0.06 258);
+  --salt-status-info-foreground: oklch(0.42 0.13 250);
+  --salt-status-success-foreground: oklch(0.42 0.11 155);
+  --salt-status-warning-foreground: oklch(0.45 0.11 65);
+  --salt-status-error-foreground: oklch(0.44 0.17 26);
+  --salt-sentiment-positive-foreground: oklch(0.42 0.11 155);
+  --salt-sentiment-negative-foreground: oklch(0.44 0.17 26);
+  --salt-actionable-primary-background: oklch(0.28 0.055 258);
+  --salt-actionable-primary-foreground: oklch(0.99 0 0);
+
+  --salt-palette-categorical-1: oklch(0.42 0.13 250);
+  --salt-palette-categorical-2: oklch(0.4 0.14 305);
+  --salt-palette-categorical-3: oklch(0.44 0.09 200);
+  --salt-palette-categorical-4: oklch(0.45 0.11 65);
+  --salt-palette-categorical-5: oklch(0.4 0.1 155);
+  --salt-palette-categorical-6: oklch(0.36 0.02 255);
+}
+
+/* ---------- Tier 2: semantic — JPM Brand / Dark ---------- */
+[data-salt-provider][data-theme="jpm"][data-mode="dark"] {
+  --salt-container-primary-background: oklch(0.2 0.028 258);
+  --salt-container-secondary-background: oklch(0.25 0.03 258);
+  --salt-container-tertiary-background: oklch(0.3 0.032 258);
+  --salt-container-primary-border: oklch(0.4 0.03 258);
+  --salt-content-primary-foreground: oklch(0.98 0.004 250);
+  --salt-content-secondary-foreground: oklch(0.86 0.008 250);
+  --salt-content-tertiary-foreground: oklch(0.78 0.01 250);
+  --salt-sentiment-accent-foreground: oklch(0.86 0.06 240);
+  --salt-status-info-foreground: oklch(0.85 0.09 240);
+  --salt-status-success-foreground: oklch(0.86 0.13 155);
+  --salt-status-warning-foreground: oklch(0.88 0.13 80);
+  --salt-status-error-foreground: oklch(0.82 0.11 22);
+  --salt-sentiment-positive-foreground: oklch(0.86 0.13 155);
+  --salt-sentiment-negative-foreground: oklch(0.82 0.11 22);
+  --salt-actionable-primary-background: oklch(0.88 0.07 240);
+  --salt-actionable-primary-foreground: oklch(0.2 0.028 258);
+
+  --salt-palette-categorical-1: oklch(0.82 0.11 240);
+  --salt-palette-categorical-2: oklch(0.8 0.13 305);
+  --salt-palette-categorical-3: oklch(0.85 0.09 200);
+  --salt-palette-categorical-4: oklch(0.88 0.13 80);
+  --salt-palette-categorical-5: oklch(0.86 0.13 155);
+  --salt-palette-categorical-6: oklch(0.86 0.008 250);
+}
+
+/* ---------- Tier 2: semantic — Chase / Light ---------- */
+[data-salt-provider][data-theme="chase"][data-mode="light"] {
+  --salt-container-primary-background: var(--salt-palette-white);
+  --salt-container-secondary-background: oklch(0.97 0.012 245);
+  --salt-container-tertiary-background: oklch(0.93 0.02 245);
+  --salt-container-primary-border: oklch(0.85 0.03 245);
+  --salt-content-primary-foreground: oklch(0.19 0.04 250);
+  --salt-content-secondary-foreground: oklch(0.37 0.03 248);
+  --salt-content-tertiary-foreground: oklch(0.47 0.025 248);
+  --salt-sentiment-accent-foreground: oklch(0.38 0.14 250);
+  --salt-status-info-foreground: oklch(0.4 0.15 252);
+  --salt-status-success-foreground: oklch(0.42 0.11 158);
+  --salt-status-warning-foreground: oklch(0.45 0.11 65);
+  --salt-status-error-foreground: oklch(0.44 0.17 26);
+  --salt-sentiment-positive-foreground: oklch(0.42 0.11 158);
+  --salt-sentiment-negative-foreground: oklch(0.44 0.17 26);
+  --salt-actionable-primary-background: oklch(0.4 0.15 252);
+  --salt-actionable-primary-foreground: oklch(0.99 0 0);
+
+  --salt-palette-categorical-1: oklch(0.4 0.15 252);
+  --salt-palette-categorical-2: oklch(0.4 0.14 310);
+  --salt-palette-categorical-3: oklch(0.44 0.09 195);
+  --salt-palette-categorical-4: oklch(0.45 0.12 60);
+  --salt-palette-categorical-5: oklch(0.4 0.1 158);
+  --salt-palette-categorical-6: oklch(0.37 0.03 248);
+}
+
+/* ---------- Tier 2: semantic — Chase / Dark ---------- */
+[data-salt-provider][data-theme="chase"][data-mode="dark"] {
+  --salt-container-primary-background: oklch(0.18 0.035 250);
+  --salt-container-secondary-background: oklch(0.23 0.04 250);
+  --salt-container-tertiary-background: oklch(0.28 0.045 250);
+  --salt-container-primary-border: oklch(0.4 0.05 250);
+  --salt-content-primary-foreground: oklch(0.98 0.005 245);
+  --salt-content-secondary-foreground: oklch(0.87 0.012 245);
+  --salt-content-tertiary-foreground: oklch(0.79 0.015 245);
+  --salt-sentiment-accent-foreground: oklch(0.85 0.09 245);
+  --salt-status-info-foreground: oklch(0.85 0.1 245);
+  --salt-status-success-foreground: oklch(0.86 0.13 158);
+  --salt-status-warning-foreground: oklch(0.88 0.13 80);
+  --salt-status-error-foreground: oklch(0.82 0.11 22);
+  --salt-sentiment-positive-foreground: oklch(0.86 0.13 158);
+  --salt-sentiment-negative-foreground: oklch(0.82 0.11 22);
+  --salt-actionable-primary-background: oklch(0.86 0.1 245);
+  --salt-actionable-primary-foreground: oklch(0.18 0.035 250);
+
+  --salt-palette-categorical-1: oklch(0.82 0.12 245);
+  --salt-palette-categorical-2: oklch(0.8 0.13 310);
+  --salt-palette-categorical-3: oklch(0.85 0.09 195);
+  --salt-palette-categorical-4: oklch(0.88 0.13 78);
+  --salt-palette-categorical-5: oklch(0.86 0.13 158);
+  --salt-palette-categorical-6: oklch(0.87 0.012 245);
+}
+
+/* ---------- 4px spatial grid + density system ---------- */
+[data-salt-provider][data-density="high"] {
+  --salt-spacing-25: 1px;
+  --salt-spacing-50: 2px;
+  --salt-spacing-100: 4px;
+  --salt-spacing-150: 6px;
+  --salt-spacing-200: 8px;
+  --salt-spacing-300: 12px;
+  --salt-spacing-400: 16px;
+  --salt-size-base: 20px;
+  --salt-size-control: 24px;
+  --salt-text-fontSize: 11px;
+  --salt-text-lineHeight: 16px;
+  --salt-text-h1-fontSize: 18px;
+  --salt-text-display-fontSize: 22px;
+  --salt-table-rowHeight: 24px;
+}
+[data-salt-provider][data-density="medium"] {
+  --salt-spacing-25: 2px;
+  --salt-spacing-50: 4px;
+  --salt-spacing-100: 8px;
+  --salt-spacing-150: 12px;
+  --salt-spacing-200: 16px;
+  --salt-spacing-300: 24px;
+  --salt-spacing-400: 32px;
+  --salt-size-base: 28px;
+  --salt-size-control: 36px;
+  --salt-text-fontSize: 13px;
+  --salt-text-lineHeight: 20px;
+  --salt-text-h1-fontSize: 22px;
+  --salt-text-display-fontSize: 30px;
+  --salt-table-rowHeight: 36px;
+}
+[data-salt-provider][data-density="low"] {
+  --salt-spacing-25: 4px;
+  --salt-spacing-50: 8px;
+  --salt-spacing-100: 12px;
+  --salt-spacing-150: 16px;
+  --salt-spacing-200: 24px;
+  --salt-spacing-300: 32px;
+  --salt-spacing-400: 44px;
+  --salt-size-base: 36px;
+  --salt-size-control: 44px;
+  --salt-text-fontSize: 15px;
+  --salt-text-lineHeight: 24px;
+  --salt-text-h1-fontSize: 26px;
+  --salt-text-display-fontSize: 38px;
+  --salt-table-rowHeight: 48px;
+}
+
+/* ---------- Vision simulator ---------- */
+[data-vision="deuteranopia"] {
+  filter: url(#salt-vision-deuteranopia);
+}
+[data-vision="protanopia"] {
+  filter: url(#salt-vision-protanopia);
+}
+[data-vision="monochromacy"] {
+  filter: grayscale(1);
+}
+
+@utility salt-text {
+  font-size: var(--salt-text-fontSize);
+  line-height: var(--salt-text-lineHeight);
+}
+
+@utility salt-card {
+  background-color: var(--salt-container-primary-background);
+  border: var(--salt-card-borderWidth) var(--salt-card-borderStyle)
+    var(--salt-container-primary-border);
+  border-radius: var(--salt-card-borderRadius);
+}
