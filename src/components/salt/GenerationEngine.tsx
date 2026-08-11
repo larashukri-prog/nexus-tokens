@@ -330,17 +330,19 @@ export function GenerationEngine() {
           </div>
         )}
 
-        <ul className="flex flex-wrap gap-[var(--salt-spacing-50)]">
-          {result.passes.map((p) => (
-            <li
-              key={p}
-              className="flex items-center gap-[var(--salt-spacing-50)] text-[0.62rem] text-salt-content-tertiary"
-            >
-              <Check aria-hidden="true" className="size-3 shrink-0 text-salt-positive" />
-              <span className="font-salt-mono">{p}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-[var(--salt-spacing-100)] min-w-0 rounded-[var(--salt-control-borderRadius)] border border-salt-container-border bg-salt-container-primary p-[var(--salt-spacing-100)]">
+          <ul className="flex flex-wrap gap-x-[var(--salt-spacing-100)] gap-y-[var(--salt-spacing-50)]">
+            {result.passes.map((p) => (
+              <li
+                key={p}
+                className="flex min-w-0 items-center gap-[var(--salt-spacing-50)] text-[0.62rem] text-salt-content-tertiary"
+              >
+                <Check aria-hidden="true" className="size-3 shrink-0 text-salt-positive" />
+                <span className="truncate font-salt-mono">{p}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       <SegmentedControl
