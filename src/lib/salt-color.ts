@@ -39,28 +39,32 @@ export function parseColor(raw: string): RGB | null {
 
   const ok = value.match(/^oklch\(\s*([\d.]+%?)\s+([\d.]+)\s+([\d.]+)/);
   if (ok) {
-    const l = ok[1].endsWith("%") ? parseFloat(ok[1]) / 100 : parseFloat(ok[1]);
-    return oklchToRgb(l, parseFloat(ok[2]), parseFloat(ok[3]));
+    const [, lRaw = "0", cRaw = "0", hRaw = "0"] = ok;
+    const l = lRaw.endsWith("%") ? parseFloat(lRaw) / 100 : parseFloat(lRaw);
+    return oklchToRgb(l, parseFloat(cRaw), parseFloat(hRaw));
   }
 
   const rgb = value.match(/^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/);
   if (rgb) {
+    const [, r = "0", g = "0", b = "0"] = rgb;
     return {
-      r: parseFloat(rgb[1]) / 255,
-      g: parseFloat(rgb[2]) / 255,
-      b: parseFloat(rgb[3]) / 255,
+      r: parseFloat(r) / 255,
+      g: parseFloat(g) / 255,
+      b: parseFloat(b) / 255,
     };
   }
 
   const hex = value.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/);
   if (hex) {
-    const h = hex[1].length === 3 ? hex[1].replace(/(.)/g, "$1$1") : hex[1];
+    const digits = hex[1] ?? "";
+    const h = digits.length === 3 ? digits.replace(/(.)/g, "$1$1") : digits;
     return {
       r: parseInt(h.slice(0, 2), 16) / 255,
       g: parseInt(h.slice(2, 4), 16) / 255,
       b: parseInt(h.slice(4, 6), 16) / 255,
     };
   }
+
   return null;
 }
 
