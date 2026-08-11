@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import type { SaltUiSpec } from "@/lib/salt-ast-schema";
 
 export type SaltMode = "light" | "dark";
 export type SaltTheme = "jpm" | "chase";
@@ -10,6 +11,10 @@ type SaltContextValue = {
   theme: SaltTheme;
   density: SaltDensity;
   vision: SaltVision;
+  /** Last spec that passed Salt AST validation and was compiled to the canvas. */
+  canvasSpec: SaltUiSpec | null;
+  canvasPrompt: string;
+  setCanvas: (spec: SaltUiSpec | null, prompt: string) => void;
   setMode: (m: SaltMode) => void;
   setTheme: (t: SaltTheme) => void;
   setDensity: (d: SaltDensity) => void;
@@ -57,10 +62,27 @@ export function SaltProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<SaltTheme>("jpm");
   const [density, setDensity] = useState<SaltDensity>("medium");
   const [vision, setVision] = useState<SaltVision>("standard");
+  const [canvasSpec, setCanvasSpec] = useState<SaltUiSpec | null>(null);
+  const [canvasPrompt, setCanvasPrompt] = useState("");
 
   const value = useMemo(
-    () => ({ mode, theme, density, vision, setMode, setTheme, setDensity, setVision }),
-    [mode, theme, density, vision],
+    () => ({
+      mode,
+      theme,
+      density,
+      vision,
+      canvasSpec,
+      canvasPrompt,
+      setCanvas: (spec: SaltUiSpec | null, prompt: string) => {
+        setCanvasSpec(spec);
+        setCanvasPrompt(prompt);
+      },
+      setMode,
+      setTheme,
+      setDensity,
+      setVision,
+    }),
+    [mode, theme, density, vision, canvasSpec, canvasPrompt],
   );
 
   return (
