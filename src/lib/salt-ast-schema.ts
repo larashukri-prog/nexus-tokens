@@ -213,13 +213,55 @@ export const PRESETS: { id: PresetId; label: string; prompt: string; hostile?: b
   },
 ];
 
+export const YIELD_PERIODS = [
+  "Q1 24",
+  "Q2 24",
+  "Q3 24",
+  "Q4 24",
+  "Q1 25",
+  "Q2 25",
+  "Q3 25",
+  "Q4 25",
+  "Q1 26",
+  "Q2 26",
+  "Q3 26",
+  "Q4 26",
+] as const;
+
+export const ASSET_RISK: Record<string, { risk: string; tone: "positive" | "warning" | "negative"; metric: string }> = {
+  "Municipal Bonds": { risk: "Low", tone: "positive", metric: "Duration 6.1y · VaR 1.8%" },
+  "Private Equity": { risk: "Elevated", tone: "negative", metric: "Illiquidity 7y · VaR 12.4%" },
+  "US Treasuries": { risk: "Low", tone: "positive", metric: "Duration 8.4y · VaR 2.6%" },
+  Equities: { risk: "Moderate", tone: "warning", metric: "Beta 1.04 · VaR 9.1%" },
+  Alternatives: { risk: "Elevated", tone: "negative", metric: "Vol 14.2% · VaR 11.0%" },
+  Cash: { risk: "Low", tone: "positive", metric: "T+0 liquidity · VaR 0.1%" },
+};
+
 const ASSET_LIBRARY: Record<string, { token: string; yieldData: number[] }> = {
-  "Municipal Bonds": { token: "--salt-palette-categorical-1", yieldData: [3.62, 3.71, 3.85, 3.9] },
-  "Private Equity": { token: "--salt-palette-categorical-2", yieldData: [8.4, 9.9, 11.78, 12.2] },
-  "US Treasuries": { token: "--salt-palette-categorical-3", yieldData: [4.11, 4.2, 4.29, 4.31] },
-  Equities: { token: "--salt-palette-categorical-4", yieldData: [1.2, 1.28, 1.32, 1.36] },
-  Alternatives: { token: "--salt-palette-categorical-5", yieldData: [2.0, 2.05, 2.1, 2.14] },
-  Cash: { token: "--salt-palette-categorical-6", yieldData: [4.9, 4.85, 4.8, 4.72] },
+  "Municipal Bonds": {
+    token: "--salt-palette-categorical-1",
+    yieldData: [3.42, 3.55, 3.62, 3.71, 3.78, 3.85, 3.9, 3.96, 4.05, 4.12, 4.18, 4.24],
+  },
+  "Private Equity": {
+    token: "--salt-palette-categorical-2",
+    yieldData: [7.8, 8.4, 9.1, 9.9, 10.6, 11.2, 11.78, 12.05, 12.2, 12.62, 12.9, 13.35],
+  },
+  "US Treasuries": {
+    token: "--salt-palette-categorical-3",
+    yieldData: [4.02, 4.11, 4.16, 4.2, 4.24, 4.29, 4.31, 4.34, 4.29, 4.26, 4.22, 4.18],
+  },
+  Equities: {
+    token: "--salt-palette-categorical-4",
+    yieldData: [1.18, 1.2, 1.24, 1.28, 1.3, 1.32, 1.34, 1.36, 1.38, 1.41, 1.44, 1.46],
+  },
+  Alternatives: {
+    token: "--salt-palette-categorical-5",
+    yieldData: [1.92, 1.96, 2.0, 2.02, 2.05, 2.08, 2.1, 2.12, 2.14, 2.18, 2.2, 2.24],
+  },
+  Cash: {
+    token: "--salt-palette-categorical-6",
+    yieldData: [4.95, 4.92, 4.9, 4.88, 4.85, 4.82, 4.8, 4.76, 4.72, 4.66, 4.6, 4.55],
+  },
 };
 
 function assetNode(name: string) {
