@@ -14,7 +14,7 @@ import { contrastRatio, readToken, verdict } from "@/lib/salt-color";
 type Tab = "form" | "spec" | "rules";
 
 const DEFAULT_PROMPT =
-  "Salt Medium-Density: Municipal Bonds vs Private Equity Yields (JPM Brand Theme)";
+  "Ad-Hoc Stress Test: Portfolio Allocation vs 200bps Rate Hike Scenario";
 
 function useProviderEl() {
   const [el, setEl] = useState<Element | null>(null);
@@ -175,7 +175,7 @@ export function GenerationEngine() {
             maxLength={600}
             spellCheck={false}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="e.g. Compare municipal bond and private equity yields at medium density…"
+            placeholder="e.g. Stress test the muni sleeve against a 200bps rate hike through 2026…"
             className="w-full resize-y rounded-[var(--salt-control-borderRadius)] border border-salt-container-border bg-salt-container-secondary p-[var(--salt-spacing-100)] font-salt-mono text-[0.7rem] leading-[1.5] text-salt-content-primary placeholder:text-salt-content-tertiary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-salt-info"
           />
           <button
@@ -207,7 +207,8 @@ export function GenerationEngine() {
                   <span className="block font-semibold text-salt-content-primary">
                     Preset {i + 1}
                   </span>
-                  {p.label}
+                  <span className="block text-salt-content-primary">{p.label}</span>
+                  <span className="mt-[2px] block text-salt-content-tertiary">{p.description}</span>
                 </span>
               </button>
             ))}
