@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Cpu, Search, ShieldCheck, TriangleAlert, Check } from "lucide-react";
+import { Search, ShieldCheck } from "lucide-react";
 import { Panel, SegmentedControl, Pill } from "./SaltControls";
 import { useSalt } from "./SaltProvider";
 import { CONTRAST_PAIRS, TOKEN_DICTIONARY, type TokenTier } from "@/lib/salt-tokens";
