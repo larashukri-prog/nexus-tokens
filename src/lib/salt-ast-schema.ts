@@ -14,11 +14,29 @@ export const SALT_AST_SCHEMA = {
   properties: {
     chartType: {
       type: "string",
-      enum: ["donut", "bar", "line", "dataGrid", "stackedBar"],
+      enum: [
+        "stressTestCurve",
+        "liquidityTimeline",
+        "donut",
+        "bar",
+        "line",
+        "dataGrid",
+        "stackedBar",
+      ],
     },
     density: { type: "string", enum: ["high", "medium", "low"] },
     theme: { type: "string", enum: ["jpmBrand", "chase"] },
     wcagTarget: { const: "AAA" },
+    timeframe: { type: "string", pattern: "^\\d{4}-\\d{4}$" },
+    riskIndicatorToken: {
+      type: "string",
+      pattern: "^--salt-status-(warning|error|success|info)-foreground$",
+    },
+    complianceRules: {
+      type: "array",
+      maxItems: 6,
+      items: { type: "string", minLength: 4, maxLength: 160 },
+    },
     assetClasses: {
       type: "array",
       minItems: 1,
@@ -29,6 +47,7 @@ export const SALT_AST_SCHEMA = {
         required: ["name", "yieldData", "saltCategoricalToken", "ariaLabel"],
         properties: {
           name: { type: "string", minLength: 2, maxLength: 64 },
+          unit: { type: "string", enum: ["percent", "usdMillions"] },
           yieldData: {
             type: "array",
             minItems: 1,
@@ -50,8 +69,12 @@ export type SaltUiSpec = {
   density: "high" | "medium" | "low";
   theme: "jpmBrand" | "chase";
   wcagTarget: "AAA";
+  timeframe?: string;
+  riskIndicatorToken?: string;
+  complianceRules?: string[];
   assetClasses: {
     name: string;
+    unit?: "percent" | "usdMillions";
     yieldData: number[];
     saltCategoricalToken: string;
     ariaLabel: string;
@@ -178,6 +201,20 @@ export function validateSaltSpec(input: string): SaltValidationResult {
     /^--salt-palette-categorical-[1-6]$/.test(String(a?.saltCategoricalToken ?? "")),
   ).length;
 
+  if (spec.chartType === "liquidityTimeline") {
+    const floor = list.find((a) => /liquidity floor/i.test(String(a?.name ?? "")));
+    if (!floor) {
+      violations.push({
+        rule: "ips/liquidity-floor",
+        detail:
+          "SALT AST SCHEMA VALIDATION ERROR — liquidityTimeline specs must declare a Treasury Liquidity Floor series for IPS compliance",
+        severity: "error",
+      });
+    } else {
+      passes.push("ips/liquidity-floor");
+    }
+  }
+
   return {
     ok: violations.filter((v) => v.severity === "error").length === 0,
     violations,
@@ -191,24 +228,35 @@ export function validateSaltSpec(input: string): SaltValidationResult {
 
 /* --------------------------------- presets -------------------------------- */
 
-export type PresetId = "muniVsPe" | "multiAssetGrid" | "inlineCssAttack";
+export type PresetId = "rateShock" | "liquidityMandate" | "inlineCssAttack";
 
-export const PRESETS: { id: PresetId; label: string; prompt: string; hostile?: boolean }[] = [
+export const PRESETS: {
+  id: PresetId;
+  label: string;
+  description: string;
+  prompt: string;
+  hostile?: boolean;
+}[] = [
   {
-    id: "muniVsPe",
-    label: "Salt Medium-Density: Municipal Bonds vs Private Equity Yields (JPM Brand Theme)",
-    prompt:
-      "Salt Medium-Density: Municipal Bonds vs Private Equity Yields (JPM Brand Theme)",
+    id: "rateShock",
+    label: "Ad-Hoc Stress Test: Portfolio Allocation vs 200bps Rate Hike Scenario",
+    description:
+      "Simulates a 200-basis-point interest rate spike on a multi-asset wealth portfolio.",
+    prompt: "Ad-Hoc Stress Test: Portfolio Allocation vs 200bps Rate Hike Scenario",
   },
   {
-    id: "multiAssetGrid",
-    label: "Salt High-Density Data Grid: Multi-Asset Yields (Dark Mode WCAG AAA)",
-    prompt: "Salt High-Density Data Grid: Multi-Asset Yields (Dark Mode WCAG AAA)",
+    id: "liquidityMandate",
+    label: "UHNW Liquidity Mandate: 5-Year Private Equity Capital Call Timeline",
+    description:
+      "Maps capital commitment schedules against a mandatory $10M short-term Treasury liquidity floor.",
+    prompt: "UHNW Liquidity Mandate: 5-Year Private Equity Capital Call Timeline",
   },
   {
     id: "inlineCssAttack",
-    label: "Unapproved Inline CSS Attack (Should Fail Salt AST Validation)",
-    prompt: "Unapproved Inline CSS Attack (Should Fail Salt AST Validation)",
+    label: "Unapproved Inline CSS Attack (AST Governance Test)",
+    description:
+      "Attempts to inject unapproved inline CSS — blocked at the AST validation boundary.",
+    prompt: "Unapproved Inline CSS Attack (AST Governance Test)",
     hostile: true,
   },
 ];
@@ -228,7 +276,44 @@ export const YIELD_PERIODS = [
   "Q4 26",
 ] as const;
 
-export const ASSET_RISK: Record<string, { risk: string; tone: "positive" | "warning" | "negative"; metric: string }> = {
+/** Quarterly labels derived from a validated `timeframe` such as "2024-2029". */
+export function periodsFor(timeframe: string | undefined, count: number): string[] {
+  const match = /^(\d{4})-(\d{4})$/.exec(timeframe ?? "");
+  const startYear = match ? Number(match[1]) : 2024;
+  const out: string[] = [];
+  for (let i = 0; i < count; i += 1) {
+    const year = startYear + Math.floor(i / 4);
+    out.push(`Q${(i % 4) + 1} ${String(year).slice(2)}`);
+  }
+  return out;
+}
+
+export const LIQUIDITY_FLOOR_USD_M = 10;
+
+export const ASSET_RISK: Record<
+  string,
+  { risk: string; tone: "positive" | "warning" | "negative"; metric: string }
+> = {
+  "Duration-Adjusted Muni Bonds": {
+    risk: "Rate sensitive",
+    tone: "warning",
+    metric: "Duration 4.2y · Rate sensitivity -3.8%",
+  },
+  "Private Equity Valuations": {
+    risk: "Illiquid",
+    tone: "negative",
+    metric: "NAV $18.5M · 10-yr lockup",
+  },
+  "PE Capital Calls": {
+    risk: "Committed",
+    tone: "warning",
+    metric: "Undrawn commitment $24.0M",
+  },
+  "Treasury Liquidity Floor": {
+    risk: "Liquid",
+    tone: "positive",
+    metric: "IPS floor $10.0M · T+0",
+  },
   "Municipal Bonds": { risk: "Low", tone: "positive", metric: "Duration 6.1y · VaR 1.8%" },
   "Private Equity": { risk: "Elevated", tone: "negative", metric: "Illiquidity 7y · VaR 12.4%" },
   "US Treasuries": { risk: "Low", tone: "positive", metric: "Duration 8.4y · VaR 2.6%" },
@@ -237,7 +322,77 @@ export const ASSET_RISK: Record<string, { risk: string; tone: "positive" | "warn
   Cash: { risk: "Low", tone: "positive", metric: "T+0 liquidity · VaR 0.1%" },
 };
 
-const ASSET_LIBRARY: Record<string, { token: string; yieldData: number[] }> = {
+/** Fixed advisor risk tiles rendered beneath the canvas chart. */
+export const RISK_TILES = [
+  {
+    name: "Muni Bond Duration",
+    token: "--salt-palette-categorical-1",
+    headline: "4.2 yrs",
+    headlineLabel: "Effective duration",
+    rows: [
+      { label: "Interest rate sensitivity", value: "-3.8%" },
+      { label: "Stress scenario", value: "+200bps parallel shift" },
+    ],
+    badge: { text: "Rate sensitive", tone: "warning" as const },
+    aria:
+      "Municipal bond duration 4.2 years, interest rate sensitivity negative 3.8 percent under a 200 basis point rate hike",
+  },
+  {
+    name: "Private Equity Valuation",
+    token: "--salt-palette-categorical-2",
+    headline: "$18.5M",
+    headlineLabel: "Reported NAV",
+    rows: [
+      { label: "Liquidity profile", value: "Illiquid (10-Yr Lockup)" },
+      { label: "Valuation basis", value: "Q4 GP mark, lagged" },
+    ],
+    badge: { text: "Illiquid", tone: "negative" as const },
+    aria:
+      "Private equity valuation 18.5 million dollars, liquidity profile illiquid with a ten year lockup",
+  },
+  {
+    name: "Short-Term Treasuries",
+    token: "--salt-palette-categorical-3",
+    headline: "$12.0M",
+    headlineLabel: "Available liquidity",
+    rows: [
+      { label: "Liquidity status", value: "Instantly Available" },
+      { label: "IPS floor test", value: "Passes $10M IPS Floor" },
+    ],
+    badge: { text: "Liquid", tone: "positive" as const },
+    aria:
+      "Short-term treasuries 12.0 million dollars, instantly available, passes the 10 million dollar IPS liquidity floor",
+  },
+];
+
+const ASSET_LIBRARY: Record<
+  string,
+  { token: string; yieldData: number[]; unit?: "percent" | "usdMillions" }
+> = {
+  "Duration-Adjusted Muni Bonds": {
+    token: "--salt-palette-categorical-1",
+    yieldData: [3.42, 3.55, 3.62, 3.71, 3.78, 3.85, 3.9, 3.96, 4.05, 4.12, 4.18, 4.24],
+  },
+  "Private Equity Valuations": {
+    token: "--salt-palette-categorical-2",
+    yieldData: [7.8, 8.4, 9.1, 9.9, 10.6, 11.2, 11.78, 12.05, 12.2, 12.62, 12.9, 13.35],
+  },
+  "PE Capital Calls": {
+    token: "--salt-palette-categorical-2",
+    unit: "usdMillions",
+    yieldData: [
+      2.4, 3.1, 1.8, 4.2, 3.6, 5.1, 2.9, 4.8, 6.2, 3.4, 2.2, 5.6, 4.1, 2.8, 3.9, 1.6, 2.1, 3.3,
+      1.4, 0.9,
+    ],
+  },
+  "Treasury Liquidity Floor": {
+    token: "--salt-palette-categorical-3",
+    unit: "usdMillions",
+    yieldData: [
+      12.4, 12.1, 12.6, 11.8, 12.0, 11.2, 11.6, 10.9, 10.2, 11.1, 11.8, 10.6, 10.8, 11.4, 10.9,
+      12.0, 12.4, 11.9, 12.6, 13.1,
+    ],
+  },
   "Municipal Bonds": {
     token: "--salt-palette-categorical-1",
     yieldData: [3.42, 3.55, 3.62, 3.71, 3.78, 3.85, 3.9, 3.96, 4.05, 4.12, 4.18, 4.24],
@@ -271,11 +426,19 @@ function assetNode(name: string) {
   };
   return {
     name,
+    ...(meta.unit ? { unit: meta.unit } : {}),
     yieldData: meta.yieldData,
     saltCategoricalToken: meta.token,
-    ariaLabel: `${name} trailing yield series, expressed in percent`,
+    ariaLabel: `${name} trailing series for the selected mandate timeframe`,
   };
 }
+
+const BASE_PORTFOLIO_YIELD = [
+  4.18, 4.24, 4.31, 4.36, 4.42, 4.48, 4.52, 4.58, 4.61, 4.66, 4.7, 4.74,
+];
+const SHOCKED_PORTFOLIO_YIELD = [
+  4.18, 4.02, 3.74, 3.46, 3.28, 3.19, 3.24, 3.36, 3.52, 3.68, 3.81, 3.94,
+];
 
 /** Simulated AI generation: natural language -> Salt UI JSON spec. */
 export function generateSpec(
@@ -284,7 +447,7 @@ export function generateSpec(
 ): string {
   const p = prompt.toLowerCase();
 
-  if (/inline css|attack|unapproved|should fail/.test(p)) {
+  if (/inline css|attack|unapproved|should fail|governance test/.test(p)) {
     return JSON.stringify(
       {
         chartType: "bar",
@@ -302,6 +465,63 @@ export function generateSpec(
             padding: "6px",
           },
         ],
+      },
+      null,
+      2,
+    );
+  }
+
+  if (/stress test|rate hike|200\s?bps|basis[- ]point|shock/.test(p)) {
+    return JSON.stringify(
+      {
+        chartType: "stressTestCurve",
+        density: /high[- ]?density/.test(p) ? "high" : fallback.density,
+        theme: /chase/.test(p) ? "chase" : "jpmBrand",
+        wcagTarget: "AAA",
+        timeframe: "2024-2026",
+        riskIndicatorToken: "--salt-status-warning-foreground",
+        complianceRules: [
+          "Stress scenario: +200bps parallel shift applied to all fixed income sleeves",
+          "Duration-adjusted repricing required for municipal bond sleeve",
+        ],
+        assetClasses: [
+          {
+            name: "Duration-Adjusted Muni Bonds",
+            unit: "percent",
+            yieldData: BASE_PORTFOLIO_YIELD,
+            saltCategoricalToken: "--salt-palette-categorical-1",
+            ariaLabel:
+              "Base portfolio yield for duration-adjusted municipal bonds, 2024 through 2026, in percent",
+          },
+          {
+            name: "Private Equity Valuations",
+            unit: "percent",
+            yieldData: SHOCKED_PORTFOLIO_YIELD,
+            saltCategoricalToken: "--salt-palette-categorical-2",
+            ariaLabel:
+              "200 basis point rate shock scenario yield for private equity valuations, 2024 through 2026, in percent",
+          },
+        ],
+      },
+      null,
+      2,
+    );
+  }
+
+  if (/liquidity|capital call|uhnw mandate|ips/.test(p)) {
+    return JSON.stringify(
+      {
+        chartType: "liquidityTimeline",
+        density: fallback.density,
+        theme: /chase/.test(p) ? "chase" : "jpmBrand",
+        wcagTarget: "AAA",
+        timeframe: "2024-2029",
+        riskIndicatorToken: "--salt-status-warning-foreground",
+        complianceRules: [
+          "IPS: short-term Treasury liquidity must never fall below 10 million dollars",
+          "Capital calls funded from Treasury sleeve only, never from illiquid marks",
+        ],
+        assetClasses: [assetNode("PE Capital Calls"), assetNode("Treasury Liquidity Floor")],
       },
       null,
       2,
@@ -343,6 +563,7 @@ export function generateSpec(
       density,
       theme,
       wcagTarget: "AAA",
+      timeframe: "2024-2026",
       assetClasses: names.map(assetNode),
     },
     null,
