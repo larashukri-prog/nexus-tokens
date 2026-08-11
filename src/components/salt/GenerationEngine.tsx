@@ -34,9 +34,11 @@ function AuditRow({
   tone: "positive" | "warning" | "negative" | "info";
 }) {
   return (
-    <li className="flex items-center justify-between gap-[var(--salt-spacing-100)] bg-salt-container-primary px-[var(--salt-spacing-100)] py-[var(--salt-spacing-50)]">
-      <span className="min-w-0 flex-1 text-[0.7rem] text-salt-content-secondary">{label}</span>
-      <Pill tone={tone}>{value}</Pill>
+    <li className="grid min-w-0 grid-cols-1 gap-[var(--salt-spacing-50)] bg-salt-container-primary px-[var(--salt-spacing-100)] py-[var(--salt-spacing-100)]">
+      <span className="min-w-0 text-[0.7rem] leading-snug text-salt-content-secondary">{label}</span>
+      <div className="min-w-0 max-w-full justify-self-start [&>span]:max-w-full [&>span]:whitespace-normal [&>span]:break-words [&>span]:leading-snug">
+        <Pill tone={tone}>{value}</Pill>
+      </div>
     </li>
   );
 }
