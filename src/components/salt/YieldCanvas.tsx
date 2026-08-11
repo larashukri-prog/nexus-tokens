@@ -3,12 +3,12 @@ import { ClipboardCheck, Copy, Ear, LayoutGrid } from "lucide-react";
 import { Panel, Pill, SegmentedControl } from "./SaltControls";
 import { useSalt } from "./SaltProvider";
 import {
-  ASSET_RISK,
   LIQUIDITY_FLOOR_USD_M,
   RISK_TILES,
   periodsFor,
   type SaltUiSpec,
 } from "@/lib/salt-ast-schema";
+
 
 const W = 640;
 const H = 240;
