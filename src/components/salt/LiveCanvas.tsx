@@ -298,7 +298,7 @@ export function LiveCanvas() {
             Private Wealth Client Live Meeting Canvas
           </p>
           <h2 className="font-semibold text-salt-content-primary [font-size:var(--salt-text-h1-fontSize)]">
-            Private Wealth Client Live Meeting Canvas — Ad-Hoc Portfolio Analysis
+            Private Wealth Client Live Meeting Canvas — Capital Commitment &amp; Liquidity Analysis
           </h2>
         </div>
         <div className="flex flex-wrap gap-[var(--salt-spacing-50)]">
