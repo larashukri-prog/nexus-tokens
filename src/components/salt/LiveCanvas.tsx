@@ -316,10 +316,10 @@ export function LiveCanvas() {
         {[
           {
             label: "Active Client Profile",
-            value: "Ultra-High-Net-Worth (UHNW) Portfolio",
+            value: "Ultra-High-Net-Worth (UHNW) Family Office",
           },
           {
-            label: "Mandate Compliance",
+            label: "IPS Mandate Compliance",
             value: "Enforced via Salt Design System Tokens & Risk Engine Schema",
           },
           {
