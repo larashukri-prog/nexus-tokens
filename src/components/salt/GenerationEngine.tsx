@@ -13,7 +13,7 @@ import { contrastRatio, readToken, verdict } from "@/lib/salt-color";
 
 type Tab = "form" | "spec" | "rules";
 
-const DEFAULT_PROMPT = "UHNW Liquidity Mandate: PE Drawdowns vs $10M IPS Floor";
+const DEFAULT_PROMPT = DEFAULT_ADVISOR_PROMPT;
 
 function useProviderEl() {
   const [el, setEl] = useState<Element | null>(null);
