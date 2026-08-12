@@ -322,46 +322,46 @@ export const ASSET_RISK: Record<
   Cash: { risk: "Low", tone: "positive", metric: "T+0 liquidity · VaR 0.1%" },
 };
 
-/** Fixed advisor risk tiles rendered beneath the canvas chart. */
+/** Scenario summary cards rendered beneath the canvas chart. */
 export const RISK_TILES = [
   {
-    name: "Muni Bond Duration",
-    token: "--salt-palette-categorical-1",
-    headline: "4.2 yrs",
-    headlineLabel: "Effective duration",
-    rows: [
-      { label: "Interest rate sensitivity", value: "-3.8%" },
-      { label: "Stress scenario", value: "+200bps parallel shift" },
-    ],
-    badge: { text: "Rate sensitive", tone: "warning" as const },
-    aria:
-      "Municipal bond duration 4.2 years, interest rate sensitivity negative 3.8 percent under a 200 basis point rate hike",
-  },
-  {
-    name: "Private Equity Valuation",
+    name: "Private Equity Capital Calls",
     token: "--salt-palette-categorical-2",
-    headline: "$18.5M",
-    headlineLabel: "Reported NAV",
+    headline: "$0.9M",
+    headlineLabel: "Next scheduled drawdown",
     rows: [
-      { label: "Liquidity profile", value: "Illiquid (10-Yr Lockup)" },
-      { label: "Valuation basis", value: "Q4 GP mark, lagged" },
+      { label: "Uncalled commitment", value: "$18.5M" },
+      { label: "Funding source", value: "Treasury sleeve only" },
     ],
-    badge: { text: "Illiquid", tone: "negative" as const },
+    badge: { text: "Committed", tone: "warning" as const },
     aria:
-      "Private equity valuation 18.5 million dollars, liquidity profile illiquid with a ten year lockup",
+      "Private equity capital calls, next drawdown 0.9 million dollars, uncalled commitment 18.5 million dollars",
   },
   {
-    name: "Short-Term Treasuries",
+    name: "Treasury Liquidity Reserves",
     token: "--salt-palette-categorical-3",
-    headline: "$12.0M",
-    headlineLabel: "Available liquidity",
+    headline: "$13.1M",
+    headlineLabel: "Total unencumbered balance",
     rows: [
-      { label: "Liquidity status", value: "Instantly Available" },
+      { label: "Available yield", value: "4.8%" },
       { label: "IPS floor test", value: "Passes $10M IPS Floor" },
     ],
     badge: { text: "Liquid", tone: "positive" as const },
     aria:
-      "Short-term treasuries 12.0 million dollars, instantly available, passes the 10 million dollar IPS liquidity floor",
+      "Treasury liquidity reserves 13.1 million dollars unencumbered at a 4.8 percent available yield, passes the 10 million dollar IPS liquidity floor",
+  },
+  {
+    name: "IPS Governance Engine",
+    token: "--salt-status-warning-foreground",
+    headline: "ips/liquidity-floor",
+    headlineLabel: "Active rule ID",
+    rows: [
+      { label: "Constraint", value: "Cash equivalents ≥ $10.0M" },
+      { label: "Enforcement", value: "Salt AST validation boundary" },
+    ],
+    badge: { text: "Enforced", tone: "info" as const },
+    aria:
+      "IPS governance engine, rule ID ips slash liquidity floor, constraint: cash equivalents must never fall below the 10.0 million dollar floor",
   },
 ];
 
