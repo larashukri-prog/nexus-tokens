@@ -518,7 +518,13 @@ function RiskTiles() {
             <h3 className="flex-1 font-semibold text-salt-content-primary">{tile.name}</h3>
             <Pill tone={tile.badge.tone}>{tile.badge.text}</Pill>
           </div>
-          <p className="mt-[var(--salt-spacing-100)] font-semibold tabular-nums text-salt-content-primary [font-size:var(--salt-text-display-fontSize)] leading-none">
+          <p
+            className={
+              tile.headline.length > 12
+                ? "mt-[var(--salt-spacing-100)] break-all font-salt-mono font-semibold text-salt-content-primary [font-size:var(--salt-text-h1-fontSize)] leading-tight"
+                : "mt-[var(--salt-spacing-100)] font-semibold tabular-nums text-salt-content-primary [font-size:var(--salt-text-display-fontSize)] leading-none"
+            }
+          >
             {tile.headline}
           </p>
           <p className="mt-[var(--salt-spacing-50)] text-[0.68rem] text-salt-content-tertiary">
