@@ -1,5 +1,6 @@
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
-import { Panel, Pill } from "./SaltControls";
+import { useState } from "react";
+import { ArrowDownRight, ArrowUpRight, ChevronDown, Sparkles } from "lucide-react";
+import { Panel, Pill, SegmentedControl } from "./SaltControls";
 import { useSalt } from "./SaltProvider";
 import { YieldCanvas } from "./YieldCanvas";
 import {
@@ -9,6 +10,7 @@ import {
   PERFORMANCE_SERIES,
   formatCurrency,
 } from "@/lib/portfolio-data";
+
 
 function Delta({ value, suffix = "%" }: { value: number; suffix?: string }) {
   const positive = value >= 0;
