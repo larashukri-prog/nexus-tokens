@@ -238,25 +238,25 @@ export const PRESETS: {
   hostile?: boolean;
 }[] = [
   {
-    id: "rateShock",
-    label: "Ad-Hoc Stress Test: Portfolio Allocation vs 200bps Rate Hike Scenario",
+    id: "liquidityMandate",
+    label: "UHNW Liquidity Mandate: PE Drawdowns vs $10M IPS Floor",
     description:
-      "Simulates a 200-basis-point interest rate spike on a multi-asset wealth portfolio.",
-    prompt: "Ad-Hoc Stress Test: Portfolio Allocation vs 200bps Rate Hike Scenario",
+      "Models uncalled Private Equity capital drawdowns against a mandatory $10M short-term Treasury liquidity floor.",
+    prompt: "UHNW Liquidity Mandate: PE Drawdowns vs $10M IPS Floor",
   },
   {
-    id: "liquidityMandate",
-    label: "UHNW Liquidity Mandate: 5-Year Private Equity Capital Call Timeline",
+    id: "rateShock",
+    label: "Macro Stress Test: 200bps Rate Shock & NAV Compression",
     description:
-      "Maps capital commitment schedules against a mandatory $10M short-term Treasury liquidity floor.",
-    prompt: "UHNW Liquidity Mandate: 5-Year Private Equity Capital Call Timeline",
+      "Simulates a 200-basis-point interest rate shock across fixed income and private equity yield curves (2024-2026).",
+    prompt: "Macro Stress Test: 200bps Rate Shock & NAV Compression",
   },
   {
     id: "inlineCssAttack",
-    label: "Unapproved Inline CSS Attack (AST Governance Test)",
+    label: "Compliance Boundary: Unapproved Inline Style Injection",
     description:
-      "Attempts to inject unapproved inline CSS — blocked at the AST validation boundary.",
-    prompt: "Unapproved Inline CSS Attack (AST Governance Test)",
+      'Attempts to inject unapproved inline CSS ("style": "color: #FF0000") — intercepted and blocked at the AST boundary.',
+    prompt: "Compliance Boundary: Unapproved Inline Style Injection (governance test)",
     hostile: true,
   },
 ];
