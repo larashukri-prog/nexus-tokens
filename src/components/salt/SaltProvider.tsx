@@ -1,5 +1,9 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import type { SaltUiSpec } from "@/lib/salt-ast-schema";
+import {
+  DEFAULT_ADVISOR_PROMPT,
+  DEFAULT_CANVAS_SPEC,
+  type SaltUiSpec,
+} from "@/lib/salt-ast-schema";
 
 export type SaltMode = "light" | "dark";
 export type SaltTheme = "jpm" | "chase";
