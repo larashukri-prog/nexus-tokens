@@ -561,7 +561,7 @@ function screenReaderTree(spec: SaltUiSpec, labels: string[], active: number): s
       `    listitem label="${a.name} ${fmt(current, a.unit)}, Salt categorical token ${a.saltCategoricalToken.replace("--salt-palette-categorical-", "")}"`,
     );
   }
-  lines.push('  group "Advisor risk tiles"');
+  lines.push('  group "Capital commitment & liquidity summary cards"');
   for (const tile of RISK_TILES) {
     lines.push(
       `    article (tabbable) label="${tile.aria}"`,
