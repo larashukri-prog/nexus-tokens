@@ -530,6 +530,12 @@ function RiskTiles() {
           <p className="mt-[var(--salt-spacing-50)] text-[0.68rem] text-salt-content-tertiary">
             {tile.headlineLabel}
           </p>
+          {tile.subtitle ? (
+            <p className="mt-[var(--salt-spacing-50)]">
+              <Pill tone="info">{tile.subtitle}</Pill>
+            </p>
+          ) : null}
+
           <dl className="mt-[var(--salt-spacing-100)] border-t border-salt-container-border pt-[var(--salt-spacing-100)] text-[0.68rem]">
             {tile.rows.map((row) => (
               <div
