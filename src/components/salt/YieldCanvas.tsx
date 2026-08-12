@@ -550,7 +550,7 @@ function RiskTiles() {
 function screenReaderTree(spec: SaltUiSpec, labels: string[], active: number): string {
   const lines = [
     'region "Private Wealth Client Live Meeting Canvas"',
-    `  heading level 2 "${spec.chartType === "liquidityTimeline" ? "5-Year PE Capital Call Timeline" : "200bps Rate Shock Stress Test"} ${spec.timeframe ?? ""}"`,
+    `  heading level 2 "${spec.chartType === "liquidityTimeline" ? "PE Capital Calls vs $10M Treasury Liquidity Floor" : "200bps Rate Shock Stress Test"} ${spec.timeframe ?? ""}"`,
     `  img "${spec.chartType}" (focusable, arrow-key navigable)`,
     `    status live=polite "${labels[active]} readout"`,
     '  list "Salt legend"',
