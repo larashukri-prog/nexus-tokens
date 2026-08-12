@@ -3,6 +3,7 @@ import { Check, Cpu, ShieldCheck, Sparkles, TriangleAlert, Wand2 } from "lucide-
 import { Panel, SegmentedControl, Pill } from "./SaltControls";
 import { useSalt } from "./SaltProvider";
 import {
+  DEFAULT_ADVISOR_PROMPT,
   PRESETS,
   SALT_AST_SCHEMA,
   generateSpec,
