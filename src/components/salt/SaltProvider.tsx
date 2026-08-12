@@ -66,8 +66,8 @@ export function SaltProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<SaltTheme>("jpm");
   const [density, setDensity] = useState<SaltDensity>("medium");
   const [vision, setVision] = useState<SaltVision>("standard");
-  const [canvasSpec, setCanvasSpec] = useState<SaltUiSpec | null>(null);
-  const [canvasPrompt, setCanvasPrompt] = useState("");
+  const [canvasSpec, setCanvasSpec] = useState<SaltUiSpec | null>(DEFAULT_CANVAS_SPEC);
+  const [canvasPrompt, setCanvasPrompt] = useState(DEFAULT_ADVISOR_PROMPT);
 
   const value = useMemo(
     () => ({
