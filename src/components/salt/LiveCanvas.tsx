@@ -1,5 +1,6 @@
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
-import { Panel, Pill } from "./SaltControls";
+import { useState } from "react";
+import { ArrowDownRight, ArrowUpRight, ChevronDown, Sparkles } from "lucide-react";
+import { Panel, Pill, SegmentedControl } from "./SaltControls";
 import { useSalt } from "./SaltProvider";
 import { YieldCanvas } from "./YieldCanvas";
 import {
@@ -9,6 +10,7 @@ import {
   PERFORMANCE_SERIES,
   formatCurrency,
 } from "@/lib/portfolio-data";
+
 
 function Delta({ value, suffix = "%" }: { value: number; suffix?: string }) {
   const positive = value >= 0;
@@ -122,7 +124,7 @@ function AllocationDonut() {
               />
               <span className="flex-1 truncate text-salt-content-secondary">{a.name}</span>
               <span className="font-semibold tabular-nums text-salt-content-primary">
-                {a.allocation}%
+                {a.allocation.toFixed(1)}%
               </span>
               <span className="w-16 text-right tabular-nums">
                 <Delta value={a.ytd} />
@@ -197,7 +199,7 @@ function AssetCards() {
             <div>
               <dt className="text-salt-content-tertiary">Weight</dt>
               <dd className="font-semibold tabular-nums text-salt-content-primary">
-                {a.allocation}%
+                {a.allocation.toFixed(1)}%
               </dd>
             </div>
             <div>
@@ -289,6 +291,19 @@ function HoldingsTable() {
 
 export function LiveCanvas() {
   const { theme, mode, density, vision } = useSalt();
+  const [focus, setFocus] = useState<"focused" | "full">("focused");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const focused = focus === "focused";
+
+  const contextWidgets = (
+    <>
+      <div className="grid gap-[var(--salt-spacing-200)] xl:grid-cols-[1.4fr_1fr]">
+        <AllocationDonut />
+        <PerformanceTrend />
+      </div>
+      <HoldingsTable />
+    </>
+  );
 
   return (
     <main className="flex min-w-0 flex-1 flex-col gap-[var(--salt-spacing-200)] p-[var(--salt-spacing-200)] lg:h-screen lg:overflow-y-auto">
@@ -298,7 +313,8 @@ export function LiveCanvas() {
             Private Wealth Client Live Meeting Canvas
           </p>
           <h2 className="font-semibold text-salt-content-primary [font-size:var(--salt-text-h1-fontSize)]">
-            Private Wealth Client Live Meeting Canvas — Capital Commitment &amp; Liquidity Analysis
+            Private Wealth Client Live Meeting Canvas &mdash; Capital Commitment &amp; Liquidity
+            Analysis
           </h2>
         </div>
         <div className="flex flex-wrap gap-[var(--salt-spacing-50)]">
@@ -308,6 +324,16 @@ export function LiveCanvas() {
           <Pill tone={vision === "standard" ? "neutral" : "warning"}>{vision}</Pill>
         </div>
       </div>
+
+      <SegmentedControl
+        label="Canvas Focus Mode"
+        value={focus}
+        onChange={setFocus}
+        options={[
+          { value: "focused", label: "Focused Liquidity View (AI Default)" },
+          { value: "full", label: "Full Portfolio Dashboard" },
+        ]}
+      />
 
       <section
         aria-label="Executive meeting context"
@@ -338,18 +364,50 @@ export function LiveCanvas() {
         ))}
       </section>
 
-
-
       <YieldCanvas />
       <KpiRow />
-      <div className="grid gap-[var(--salt-spacing-200)] xl:grid-cols-[1.4fr_1fr]">
-        <AllocationDonut />
-        <PerformanceTrend />
-      </div>
       <AssetCards />
-      <HoldingsTable />
+
+      {focused ? (
+        <section
+          aria-label="Additional portfolio context"
+          className="rounded-[var(--salt-control-borderRadius)] border border-salt-container-border bg-salt-container-primary"
+        >
+          <div className="flex flex-wrap items-center gap-[var(--salt-spacing-100)] p-[var(--salt-spacing-150)] pb-0">
+            <Pill tone="info">
+              <Sparkles aria-hidden="true" className="size-3" />
+              AI Context Filtering: Non-essential widgets collapsed to prioritize cash-flow decision
+              making.
+            </Pill>
+          </div>
+          <button
+            type="button"
+            aria-expanded={drawerOpen}
+            onClick={() => setDrawerOpen((v) => !v)}
+            className="flex w-full items-center justify-between gap-[var(--salt-spacing-100)] p-[var(--salt-spacing-150)] text-left font-semibold text-salt-content-primary hover:bg-salt-container-tertiary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-salt-info"
+          >
+            <span>Additional Portfolio Context &amp; Holdings Blotter (3 Widgets Collapsed)</span>
+            <ChevronDown
+              aria-hidden="true"
+              className={
+                drawerOpen
+                  ? "size-4 shrink-0 rotate-180 transition-transform"
+                  : "size-4 shrink-0 transition-transform"
+              }
+            />
+          </button>
+          {drawerOpen ? (
+            <div className="flex flex-col gap-[var(--salt-spacing-200)] border-t border-salt-container-border p-[var(--salt-spacing-150)]">
+              {contextWidgets}
+            </div>
+          ) : null}
+        </section>
+      ) : (
+        contextWidgets
+      )}
+
       <p className="text-[0.68rem] text-salt-content-tertiary">
-        Every surface above resolves through Salt semantic variables — no raw hex, no legacy
+        Every surface above resolves through Salt semantic variables &mdash; no raw hex, no legacy
         component overrides.
       </p>
     </main>

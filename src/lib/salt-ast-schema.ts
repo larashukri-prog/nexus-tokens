@@ -329,6 +329,7 @@ export const RISK_TILES = [
     token: "--salt-palette-categorical-2",
     headline: "$0.9M",
     headlineLabel: "Next scheduled drawdown",
+    subtitle: null as string | null,
     rows: [
       { label: "Uncalled commitment", value: "$18.5M" },
       { label: "Funding source", value: "Treasury sleeve only" },
@@ -342,6 +343,7 @@ export const RISK_TILES = [
     token: "--salt-palette-categorical-3",
     headline: "$13.1M",
     headlineLabel: "Total unencumbered balance",
+    subtitle: "US Treasuries ($10.22M) + Cash Equivalents ($2.88M)" as string | null,
     rows: [
       { label: "Available yield", value: "4.8%" },
       { label: "IPS floor test", value: "Passes $10M IPS Floor" },
@@ -355,6 +357,7 @@ export const RISK_TILES = [
     token: "--salt-status-warning-foreground",
     headline: "ips/liquidity-floor",
     headlineLabel: "Active rule ID",
+    subtitle: null as string | null,
     rows: [
       { label: "Constraint", value: "Cash equivalents ≥ $10.0M" },
       { label: "Enforcement", value: "Salt AST validation boundary" },
