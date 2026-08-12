@@ -570,3 +570,12 @@ export function generateSpec(
     2,
   );
 }
+
+/* --------------------------- default canvas state -------------------------- */
+
+/** Scenario 1 is the default showcase: PE drawdowns vs the $10M IPS floor. */
+export const DEFAULT_ADVISOR_PROMPT = "UHNW Liquidity Mandate: PE Drawdowns vs $10M IPS Floor";
+
+export const DEFAULT_CANVAS_SPEC = JSON.parse(
+  generateSpec(DEFAULT_ADVISOR_PROMPT, { density: "medium", theme: "jpmBrand" }),
+) as SaltUiSpec;
