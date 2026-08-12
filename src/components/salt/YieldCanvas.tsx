@@ -593,7 +593,11 @@ export function YieldCanvas() {
   );
 
   useEffect(() => {
-    setActive(canvasSpec?.chartType === "liquidityTimeline" ? 0 : Math.max(0, pointCount - 1));
+    setActive(
+      canvasSpec?.chartType === "liquidityTimeline"
+        ? Math.min(5, Math.max(0, pointCount - 1))
+        : Math.max(0, pointCount - 1),
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasSpec]);
 
