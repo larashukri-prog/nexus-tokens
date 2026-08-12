@@ -324,6 +324,16 @@ function LiquidityTimelineChart({
           );
         })}
 
+        <line
+          x1={x(active)}
+          x2={x(active)}
+          y1={PAD.top}
+          y2={H - PAD.bottom}
+          stroke="var(--salt-content-tertiary-foreground)"
+          strokeWidth="1"
+          strokeDasharray="3 3"
+        />
+
         {calls?.yieldData.map((v, i) => (
           <rect
             key={`${labels[i]}-bar`}
@@ -337,13 +347,31 @@ function LiquidityTimelineChart({
         ))}
 
         {floorSeries && (
-          <polyline
-            points={floorSeries.yieldData.map((v, i) => `${x(i)},${y(v)}`).join(" ")}
-            fill="none"
-            stroke={`var(${floorSeries.saltCategoricalToken})`}
-            strokeWidth="2.5"
-            strokeLinejoin="round"
-          />
+          <>
+            <polyline
+              points={`${x(0)},${H - PAD.bottom} ${floorSeries.yieldData
+                .map((v, i) => `${x(i)},${y(v)}`)
+                .join(" ")} ${x(floorSeries.yieldData.length - 1)},${H - PAD.bottom}`}
+              fill={`var(${floorSeries.saltCategoricalToken})`}
+              opacity="0.14"
+              stroke="none"
+            />
+            <polyline
+              points={floorSeries.yieldData.map((v, i) => `${x(i)},${y(v)}`).join(" ")}
+              fill="none"
+              stroke={`var(${floorSeries.saltCategoricalToken})`}
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+            />
+            <circle
+              cx={x(active)}
+              cy={y(floorSeries.yieldData[Math.min(active, floorSeries.yieldData.length - 1)] ?? 0)}
+              r="4"
+              fill="var(--salt-container-primary-background)"
+              stroke={`var(${floorSeries.saltCategoricalToken})`}
+              strokeWidth="2.5"
+            />
+          </>
         )}
 
         <line
@@ -355,14 +383,24 @@ function LiquidityTimelineChart({
           strokeWidth="2"
           strokeDasharray="8 4"
         />
+        <rect
+          x={W - PAD.right - 128}
+          y={y(LIQUIDITY_FLOOR_USD_M) - 16}
+          width="128"
+          height="14"
+          fill="var(--salt-container-primary-background)"
+          stroke="var(--salt-status-warning-foreground)"
+          strokeWidth="1"
+        />
         <text
-          x={W - PAD.right}
-          y={y(LIQUIDITY_FLOOR_USD_M) - 5}
+          x={W - PAD.right - 5}
+          y={y(LIQUIDITY_FLOOR_USD_M) - 6}
           textAnchor="end"
           className="fill-salt-warning text-[9px] font-semibold"
         >
-          $10M IPS liquidity floor
+          $10M IPS Liquidity Floor
         </text>
+
 
         {labels.map((l, i) =>
           i % 4 === 0 || i === points - 1 ? (
@@ -413,9 +451,15 @@ function LiquidityTimelineChart({
                   : "text-[0.7rem] font-semibold tabular-nums text-salt-negative"
               }
             >
-              {headroom >= 0 ? "+" : ""}
-              {headroom.toFixed(1)}M
+              {headroom >= 0 ? "+" : "-"}${Math.abs(headroom).toFixed(1)}M{" "}
+              {headroom >= 0 ? "above floor" : "below floor"}
             </span>
+          </li>
+          <li className="flex items-center gap-[var(--salt-spacing-50)]">
+            <span className="text-[0.7rem] text-salt-content-secondary">Status</span>
+            <Pill tone={headroom >= 0 ? "positive" : "negative"}>
+              {headroom >= 0 ? "MANDATE SATISFIED" : "MANDATE BREACH"}
+            </Pill>
           </li>
         </ul>
       </div>
@@ -474,7 +518,13 @@ function RiskTiles() {
             <h3 className="flex-1 font-semibold text-salt-content-primary">{tile.name}</h3>
             <Pill tone={tile.badge.tone}>{tile.badge.text}</Pill>
           </div>
-          <p className="mt-[var(--salt-spacing-100)] font-semibold tabular-nums text-salt-content-primary [font-size:var(--salt-text-display-fontSize)] leading-none">
+          <p
+            className={
+              tile.headline.length > 12
+                ? "mt-[var(--salt-spacing-100)] break-all font-salt-mono font-semibold text-salt-content-primary [font-size:var(--salt-text-h1-fontSize)] leading-tight"
+                : "mt-[var(--salt-spacing-100)] font-semibold tabular-nums text-salt-content-primary [font-size:var(--salt-text-display-fontSize)] leading-none"
+            }
+          >
             {tile.headline}
           </p>
           <p className="mt-[var(--salt-spacing-50)] text-[0.68rem] text-salt-content-tertiary">
@@ -506,7 +556,7 @@ function RiskTiles() {
 function screenReaderTree(spec: SaltUiSpec, labels: string[], active: number): string {
   const lines = [
     'region "Private Wealth Client Live Meeting Canvas"',
-    `  heading level 2 "${spec.chartType === "liquidityTimeline" ? "5-Year PE Capital Call Timeline" : "200bps Rate Shock Stress Test"} ${spec.timeframe ?? ""}"`,
+    `  heading level 2 "${spec.chartType === "liquidityTimeline" ? "PE Capital Calls vs $10M Treasury Liquidity Floor" : "200bps Rate Shock Stress Test"} ${spec.timeframe ?? ""}"`,
     `  img "${spec.chartType}" (focusable, arrow-key navigable)`,
     `    status live=polite "${labels[active]} readout"`,
     '  list "Salt legend"',
@@ -517,7 +567,7 @@ function screenReaderTree(spec: SaltUiSpec, labels: string[], active: number): s
       `    listitem label="${a.name} ${fmt(current, a.unit)}, Salt categorical token ${a.saltCategoricalToken.replace("--salt-palette-categorical-", "")}"`,
     );
   }
-  lines.push('  group "Advisor risk tiles"');
+  lines.push('  group "Capital commitment & liquidity summary cards"');
   for (const tile of RISK_TILES) {
     lines.push(
       `    article (tabbable) label="${tile.aria}"`,
@@ -549,7 +599,11 @@ export function YieldCanvas() {
   );
 
   useEffect(() => {
-    setActive(canvasSpec?.chartType === "liquidityTimeline" ? 0 : Math.max(0, pointCount - 1));
+    setActive(
+      canvasSpec?.chartType === "liquidityTimeline"
+        ? Math.min(5, Math.max(0, pointCount - 1))
+        : Math.max(0, pointCount - 1),
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasSpec]);
 

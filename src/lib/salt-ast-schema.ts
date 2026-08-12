@@ -238,25 +238,25 @@ export const PRESETS: {
   hostile?: boolean;
 }[] = [
   {
-    id: "rateShock",
-    label: "Ad-Hoc Stress Test: Portfolio Allocation vs 200bps Rate Hike Scenario",
+    id: "liquidityMandate",
+    label: "UHNW Liquidity Mandate: PE Drawdowns vs $10M IPS Floor",
     description:
-      "Simulates a 200-basis-point interest rate spike on a multi-asset wealth portfolio.",
-    prompt: "Ad-Hoc Stress Test: Portfolio Allocation vs 200bps Rate Hike Scenario",
+      "Models uncalled Private Equity capital drawdowns against a mandatory $10M short-term Treasury liquidity floor.",
+    prompt: "UHNW Liquidity Mandate: PE Drawdowns vs $10M IPS Floor",
   },
   {
-    id: "liquidityMandate",
-    label: "UHNW Liquidity Mandate: 5-Year Private Equity Capital Call Timeline",
+    id: "rateShock",
+    label: "Macro Stress Test: 200bps Rate Shock & NAV Compression",
     description:
-      "Maps capital commitment schedules against a mandatory $10M short-term Treasury liquidity floor.",
-    prompt: "UHNW Liquidity Mandate: 5-Year Private Equity Capital Call Timeline",
+      "Simulates a 200-basis-point interest rate shock across fixed income and private equity yield curves (2024-2026).",
+    prompt: "Macro Stress Test: 200bps Rate Shock & NAV Compression",
   },
   {
     id: "inlineCssAttack",
-    label: "Unapproved Inline CSS Attack (AST Governance Test)",
+    label: "Compliance Boundary: Unapproved Inline Style Injection",
     description:
-      "Attempts to inject unapproved inline CSS — blocked at the AST validation boundary.",
-    prompt: "Unapproved Inline CSS Attack (AST Governance Test)",
+      'Attempts to inject unapproved inline CSS ("style": "color: #FF0000") — intercepted and blocked at the AST boundary.',
+    prompt: "Compliance Boundary: Unapproved Inline Style Injection (governance test)",
     hostile: true,
   },
 ];
@@ -322,46 +322,46 @@ export const ASSET_RISK: Record<
   Cash: { risk: "Low", tone: "positive", metric: "T+0 liquidity · VaR 0.1%" },
 };
 
-/** Fixed advisor risk tiles rendered beneath the canvas chart. */
+/** Scenario summary cards rendered beneath the canvas chart. */
 export const RISK_TILES = [
   {
-    name: "Muni Bond Duration",
-    token: "--salt-palette-categorical-1",
-    headline: "4.2 yrs",
-    headlineLabel: "Effective duration",
-    rows: [
-      { label: "Interest rate sensitivity", value: "-3.8%" },
-      { label: "Stress scenario", value: "+200bps parallel shift" },
-    ],
-    badge: { text: "Rate sensitive", tone: "warning" as const },
-    aria:
-      "Municipal bond duration 4.2 years, interest rate sensitivity negative 3.8 percent under a 200 basis point rate hike",
-  },
-  {
-    name: "Private Equity Valuation",
+    name: "Private Equity Capital Calls",
     token: "--salt-palette-categorical-2",
-    headline: "$18.5M",
-    headlineLabel: "Reported NAV",
+    headline: "$0.9M",
+    headlineLabel: "Next scheduled drawdown",
     rows: [
-      { label: "Liquidity profile", value: "Illiquid (10-Yr Lockup)" },
-      { label: "Valuation basis", value: "Q4 GP mark, lagged" },
+      { label: "Uncalled commitment", value: "$18.5M" },
+      { label: "Funding source", value: "Treasury sleeve only" },
     ],
-    badge: { text: "Illiquid", tone: "negative" as const },
+    badge: { text: "Committed", tone: "warning" as const },
     aria:
-      "Private equity valuation 18.5 million dollars, liquidity profile illiquid with a ten year lockup",
+      "Private equity capital calls, next drawdown 0.9 million dollars, uncalled commitment 18.5 million dollars",
   },
   {
-    name: "Short-Term Treasuries",
+    name: "Treasury Liquidity Reserves",
     token: "--salt-palette-categorical-3",
-    headline: "$12.0M",
-    headlineLabel: "Available liquidity",
+    headline: "$13.1M",
+    headlineLabel: "Total unencumbered balance",
     rows: [
-      { label: "Liquidity status", value: "Instantly Available" },
+      { label: "Available yield", value: "4.8%" },
       { label: "IPS floor test", value: "Passes $10M IPS Floor" },
     ],
     badge: { text: "Liquid", tone: "positive" as const },
     aria:
-      "Short-term treasuries 12.0 million dollars, instantly available, passes the 10 million dollar IPS liquidity floor",
+      "Treasury liquidity reserves 13.1 million dollars unencumbered at a 4.8 percent available yield, passes the 10 million dollar IPS liquidity floor",
+  },
+  {
+    name: "IPS Governance Engine",
+    token: "--salt-status-warning-foreground",
+    headline: "ips/liquidity-floor",
+    headlineLabel: "Active rule ID",
+    rows: [
+      { label: "Constraint", value: "Cash equivalents ≥ $10.0M" },
+      { label: "Enforcement", value: "Salt AST validation boundary" },
+    ],
+    badge: { text: "Enforced", tone: "info" as const },
+    aria:
+      "IPS governance engine, rule ID ips slash liquidity floor, constraint: cash equivalents must never fall below the 10.0 million dollar floor",
   },
 ];
 
@@ -518,8 +518,8 @@ export function generateSpec(
         timeframe: "2024-2029",
         riskIndicatorToken: "--salt-status-warning-foreground",
         complianceRules: [
-          "IPS: short-term Treasury liquidity must never fall below 10 million dollars",
-          "Capital calls funded from Treasury sleeve only, never from illiquid marks",
+          "ips/liquidity-floor — unencumbered Treasury cash equivalents must never fall below $10.0M",
+          "ips/liquidity-floor — capital calls funded from the Treasury sleeve only, never from illiquid marks",
         ],
         assetClasses: [assetNode("PE Capital Calls"), assetNode("Treasury Liquidity Floor")],
       },
@@ -570,3 +570,12 @@ export function generateSpec(
     2,
   );
 }
+
+/* --------------------------- default canvas state -------------------------- */
+
+/** Scenario 1 is the default showcase: PE drawdowns vs the $10M IPS floor. */
+export const DEFAULT_ADVISOR_PROMPT = "UHNW Liquidity Mandate: PE Drawdowns vs $10M IPS Floor";
+
+export const DEFAULT_CANVAS_SPEC = JSON.parse(
+  generateSpec(DEFAULT_ADVISOR_PROMPT, { density: "medium", theme: "jpmBrand" }),
+) as SaltUiSpec;

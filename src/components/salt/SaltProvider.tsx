@@ -1,5 +1,9 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import type { SaltUiSpec } from "@/lib/salt-ast-schema";
+import {
+  DEFAULT_ADVISOR_PROMPT,
+  DEFAULT_CANVAS_SPEC,
+  type SaltUiSpec,
+} from "@/lib/salt-ast-schema";
 
 export type SaltMode = "light" | "dark";
 export type SaltTheme = "jpm" | "chase";
@@ -62,8 +66,8 @@ export function SaltProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<SaltTheme>("jpm");
   const [density, setDensity] = useState<SaltDensity>("medium");
   const [vision, setVision] = useState<SaltVision>("standard");
-  const [canvasSpec, setCanvasSpec] = useState<SaltUiSpec | null>(null);
-  const [canvasPrompt, setCanvasPrompt] = useState("");
+  const [canvasSpec, setCanvasSpec] = useState<SaltUiSpec | null>(DEFAULT_CANVAS_SPEC);
+  const [canvasPrompt, setCanvasPrompt] = useState(DEFAULT_ADVISOR_PROMPT);
 
   const value = useMemo(
     () => ({
