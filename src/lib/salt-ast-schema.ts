@@ -518,8 +518,8 @@ export function generateSpec(
         timeframe: "2024-2029",
         riskIndicatorToken: "--salt-status-warning-foreground",
         complianceRules: [
-          "IPS: short-term Treasury liquidity must never fall below 10 million dollars",
-          "Capital calls funded from Treasury sleeve only, never from illiquid marks",
+          "ips/liquidity-floor — unencumbered Treasury cash equivalents must never fall below $10.0M",
+          "ips/liquidity-floor — capital calls funded from the Treasury sleeve only, never from illiquid marks",
         ],
         assetClasses: [assetNode("PE Capital Calls"), assetNode("Treasury Liquidity Floor")],
       },
