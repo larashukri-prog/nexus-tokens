@@ -451,9 +451,15 @@ function LiquidityTimelineChart({
                   : "text-[0.7rem] font-semibold tabular-nums text-salt-negative"
               }
             >
-              {headroom >= 0 ? "+" : ""}
-              {headroom.toFixed(1)}M
+              {headroom >= 0 ? "+" : "-"}${Math.abs(headroom).toFixed(1)}M{" "}
+              {headroom >= 0 ? "above floor" : "below floor"}
             </span>
+          </li>
+          <li className="flex items-center gap-[var(--salt-spacing-50)]">
+            <span className="text-[0.7rem] text-salt-content-secondary">Status</span>
+            <Pill tone={headroom >= 0 ? "positive" : "negative"}>
+              {headroom >= 0 ? "MANDATE SATISFIED" : "MANDATE BREACH"}
+            </Pill>
           </li>
         </ul>
       </div>
