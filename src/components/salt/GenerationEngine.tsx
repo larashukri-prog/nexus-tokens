@@ -13,8 +13,7 @@ import { contrastRatio, readToken, verdict } from "@/lib/salt-color";
 
 type Tab = "form" | "spec" | "rules";
 
-const DEFAULT_PROMPT =
-  "Ad-Hoc Stress Test: Portfolio Allocation vs 200bps Rate Hike Scenario";
+const DEFAULT_PROMPT = "UHNW Liquidity Mandate: PE Drawdowns vs $10M IPS Floor";
 
 function useProviderEl() {
   const [el, setEl] = useState<Element | null>(null);
