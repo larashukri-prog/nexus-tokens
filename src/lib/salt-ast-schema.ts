@@ -342,6 +342,7 @@ export const RISK_TILES = [
     token: "--salt-palette-categorical-3",
     headline: "$13.1M",
     headlineLabel: "Total unencumbered balance",
+    subtitle: "US Treasuries ($10.22M) + Cash Equivalents ($2.88M)",
     rows: [
       { label: "Available yield", value: "4.8%" },
       { label: "IPS floor test", value: "Passes $10M IPS Floor" },
