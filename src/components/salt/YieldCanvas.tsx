@@ -324,6 +324,16 @@ function LiquidityTimelineChart({
           );
         })}
 
+        <line
+          x1={x(active)}
+          x2={x(active)}
+          y1={PAD.top}
+          y2={H - PAD.bottom}
+          stroke="var(--salt-content-tertiary-foreground)"
+          strokeWidth="1"
+          strokeDasharray="3 3"
+        />
+
         {calls?.yieldData.map((v, i) => (
           <rect
             key={`${labels[i]}-bar`}
@@ -337,13 +347,31 @@ function LiquidityTimelineChart({
         ))}
 
         {floorSeries && (
-          <polyline
-            points={floorSeries.yieldData.map((v, i) => `${x(i)},${y(v)}`).join(" ")}
-            fill="none"
-            stroke={`var(${floorSeries.saltCategoricalToken})`}
-            strokeWidth="2.5"
-            strokeLinejoin="round"
-          />
+          <>
+            <polyline
+              points={`${x(0)},${H - PAD.bottom} ${floorSeries.yieldData
+                .map((v, i) => `${x(i)},${y(v)}`)
+                .join(" ")} ${x(floorSeries.yieldData.length - 1)},${H - PAD.bottom}`}
+              fill={`var(${floorSeries.saltCategoricalToken})`}
+              opacity="0.14"
+              stroke="none"
+            />
+            <polyline
+              points={floorSeries.yieldData.map((v, i) => `${x(i)},${y(v)}`).join(" ")}
+              fill="none"
+              stroke={`var(${floorSeries.saltCategoricalToken})`}
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+            />
+            <circle
+              cx={x(active)}
+              cy={y(floorSeries.yieldData[Math.min(active, floorSeries.yieldData.length - 1)] ?? 0)}
+              r="4"
+              fill="var(--salt-container-primary-background)"
+              stroke={`var(${floorSeries.saltCategoricalToken})`}
+              strokeWidth="2.5"
+            />
+          </>
         )}
 
         <line
@@ -355,14 +383,24 @@ function LiquidityTimelineChart({
           strokeWidth="2"
           strokeDasharray="8 4"
         />
+        <rect
+          x={W - PAD.right - 128}
+          y={y(LIQUIDITY_FLOOR_USD_M) - 16}
+          width="128"
+          height="14"
+          fill="var(--salt-container-primary-background)"
+          stroke="var(--salt-status-warning-foreground)"
+          strokeWidth="1"
+        />
         <text
-          x={W - PAD.right}
-          y={y(LIQUIDITY_FLOOR_USD_M) - 5}
+          x={W - PAD.right - 5}
+          y={y(LIQUIDITY_FLOOR_USD_M) - 6}
           textAnchor="end"
           className="fill-salt-warning text-[9px] font-semibold"
         >
-          $10M IPS liquidity floor
+          $10M IPS Liquidity Floor
         </text>
+
 
         {labels.map((l, i) =>
           i % 4 === 0 || i === points - 1 ? (
