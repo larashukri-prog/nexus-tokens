@@ -3,6 +3,7 @@ import { SaltProvider } from "@/components/salt/SaltProvider";
 import { SaltAppBar } from "@/components/salt/SaltAppBar";
 import { TokenEngineSidebar } from "@/components/salt/TokenEngine";
 import { LiveCanvas } from "@/components/salt/LiveCanvas";
+import { SaltFooter } from "@/components/salt/SaltFooter";
 
 const title = "Nexus-Tokens — Salt Token Engine for Wealth Management";
 const description =
@@ -30,6 +31,8 @@ function Index() {
         <TokenEngineSidebar />
         <LiveCanvas />
       </div>
+      <SaltFooter />
     </SaltProvider>
   );
 }
+
