@@ -1,9 +1,9 @@
 import { Hexagon } from "lucide-react";
 import { SegmentedControl } from "./SaltControls";
-import { useSalt } from "./SaltProvider";
+import { useSaltPrefs } from "./SaltProvider";
 
 export function SaltAppBar() {
-  const { mode, setMode, theme, setTheme, vision, setVision } = useSalt();
+  const { mode, setMode, theme, setTheme, vision, setVision } = useSaltPrefs();
 
   return (
     <header className="flex flex-wrap items-end justify-between gap-[var(--salt-spacing-200)] border-b border-salt-container-border bg-salt-container-primary px-[var(--salt-spacing-200)] py-[var(--salt-spacing-100)]">

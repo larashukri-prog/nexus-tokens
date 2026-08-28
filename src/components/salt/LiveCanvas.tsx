@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowDownRight, ArrowUpRight, ChevronDown, Sparkles } from "lucide-react";
 import { Panel, Pill, SegmentedControl } from "./SaltControls";
-import { useSalt } from "./SaltProvider";
+import { useSaltPrefs } from "./SaltProvider";
 import { YieldCanvas } from "./YieldCanvas";
 import {
   ASSET_CLASSES,
@@ -290,7 +290,7 @@ function HoldingsTable() {
 }
 
 export function LiveCanvas() {
-  const { theme, mode, density, vision } = useSalt();
+  const { theme, mode, density, vision } = useSaltPrefs();
   const [focus, setFocus] = useState<"focused" | "full">("focused");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const focused = focus === "focused";

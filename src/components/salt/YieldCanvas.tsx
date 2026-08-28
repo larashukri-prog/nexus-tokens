@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ClipboardCheck, Copy, Ear, LayoutGrid } from "lucide-react";
 import { Panel, Pill, SegmentedControl } from "./SaltControls";
-import { useSalt } from "./SaltProvider";
+import { useSaltCanvas, useSaltPrefs } from "./SaltProvider";
 import {
   LIQUIDITY_FLOOR_USD_M,
   RISK_TILES,
@@ -634,7 +634,8 @@ function screenReaderTree(spec: SaltUiSpec, labels: string[], active: number): s
 }
 
 export function YieldCanvas() {
-  const { canvasSpec, canvasPrompt, density, setDensity, mode, theme } = useSalt();
+  const { density, setDensity, mode, theme } = useSaltPrefs();
+  const { canvasSpec, canvasPrompt } = useSaltCanvas();
   const [active, setActive] = useState(0);
   const [copied, setCopied] = useState(false);
   const [showTree, setShowTree] = useState(false);

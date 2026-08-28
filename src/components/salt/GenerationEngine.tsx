@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Check, Cpu, ShieldCheck, Sparkles, TriangleAlert, Wand2 } from "lucide-react";
 import { Panel, SegmentedControl, Pill } from "./SaltControls";
-import { useSalt } from "./SaltProvider";
+import { useSaltCanvas, useSaltPrefs } from "./SaltProvider";
 import {
   DEFAULT_ADVISOR_PROMPT,
   MAX_SPEC_PAYLOAD_CHARS,
@@ -59,7 +59,8 @@ function AuditRow({
 
 export function GenerationEngine() {
   const el = useProviderEl();
-  const { density, theme, mode, setDensity, setTheme, setCanvas } = useSalt();
+  const { density, theme, mode, setDensity, setTheme } = useSaltPrefs();
+  const { setCanvas } = useSaltCanvas();
   const [tab, setTab] = useState<Tab>("form");
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
   const [spec, setSpec] = useState(() =>
