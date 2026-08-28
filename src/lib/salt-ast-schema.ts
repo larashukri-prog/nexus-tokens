@@ -673,3 +673,14 @@ export const DEFAULT_CANVAS_SPEC: SaltUiSpecShape = saltUiSpecContract.parse(
 /* Dev-only strict-contract gates for the design-data literals in this module. */
 assertContract(z.array(riskTileContract), RISK_TILES, "RISK_TILES");
 assertContract(z.record(assetRiskContract), ASSET_RISK, "ASSET_RISK");
+/* Dev-only guarantee: the engine can only ever emit semantic/component tokens. */
+if (import.meta.env.DEV) {
+  for (const preset of PRESETS) {
+    if (preset.hostile) continue;
+    assertContract(
+      saltUiSpecContract,
+      JSON.parse(generateSpec(preset.prompt, { density: "medium", theme: "jpmBrand" })),
+      `generateSpec("${preset.id}")`,
+    );
+  }
+}
