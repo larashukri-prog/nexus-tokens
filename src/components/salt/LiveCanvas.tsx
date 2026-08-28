@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowDownRight, ArrowUpRight, ChevronDown, Sparkles } from "lucide-react";
 import { Panel, Pill, SegmentedControl } from "./SaltControls";
-import { useSaltPrefs } from "./SaltProvider";
+import { useSaltPrefs } from "./salt-context";
 import { YieldCanvas } from "./YieldCanvas";
 import {
   ASSET_CLASSES,

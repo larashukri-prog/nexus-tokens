@@ -1,6 +1,6 @@
 import { Hexagon } from "lucide-react";
 import { SegmentedControl } from "./SaltControls";
-import { useSaltPrefs } from "./SaltProvider";
+import { useSaltPrefs } from "./salt-context";
 
 export function SaltAppBar() {
   const { mode, setMode, theme, setTheme, vision, setVision } = useSaltPrefs();
