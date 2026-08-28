@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Check, Cpu, ShieldCheck, Sparkles, TriangleAlert, Wand2 } from "lucide-react";
 import { Panel, SegmentedControl, Pill } from "./SaltControls";
-import { useSaltCanvas, useSaltPrefs } from "./SaltProvider";
+import { useSaltCanvas, useSaltPrefs } from "./salt-context";
 import {
   DEFAULT_ADVISOR_PROMPT,
   MAX_SPEC_PAYLOAD_CHARS,

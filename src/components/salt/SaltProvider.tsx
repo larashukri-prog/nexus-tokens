@@ -1,65 +1,31 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 
 import {
   DEFAULT_ADVISOR_PROMPT,
   DEFAULT_CANVAS_SPEC,
   type SaltUiSpec,
 } from "@/lib/salt-ast-schema";
+import {
+  SaltCanvasContext,
+  SaltPrefsContext,
+  type SaltCanvasValue,
+  type SaltDensity,
+  type SaltMode,
+  type SaltPrefsValue,
+  type SaltTheme,
+  type SaltVision,
+} from "./salt-context";
 
-export type SaltMode = "light" | "dark";
-export type SaltTheme = "jpm" | "chase";
-export type SaltDensity = "high" | "medium" | "low";
-export type SaltVision = "standard" | "deuteranopia" | "protanopia" | "monochromacy";
+export type {
+  SaltMode,
+  SaltTheme,
+  SaltDensity,
+  SaltVision,
+  SaltPrefsValue,
+  SaltCanvasValue,
+} from "./salt-context";
+export { useSalt, useSaltPrefs, useSaltCanvas } from "./salt-context";
 
-type SaltPrefsValue = {
-  mode: SaltMode;
-  theme: SaltTheme;
-  density: SaltDensity;
-  vision: SaltVision;
-  setMode: (m: SaltMode) => void;
-  setTheme: (t: SaltTheme) => void;
-  setDensity: (d: SaltDensity) => void;
-  setVision: (v: SaltVision) => void;
-};
-
-type SaltCanvasValue = {
-  /** Last spec that passed Salt AST validation and was compiled to the canvas. */
-  canvasSpec: SaltUiSpec | null;
-  canvasPrompt: string;
-  setCanvas: (spec: SaltUiSpec | null, prompt: string) => void;
-};
-
-type SaltContextValue = SaltPrefsValue & SaltCanvasValue;
-
-const SaltPrefsContext = createContext<SaltPrefsValue | null>(null);
-const SaltCanvasContext = createContext<SaltCanvasValue | null>(null);
-
-/** Stable UI preferences only — never re-renders when the canvas spec changes. */
-export function useSaltPrefs(): SaltPrefsValue {
-  const ctx = useContext(SaltPrefsContext);
-  if (!ctx) throw new Error("useSaltPrefs must be used inside <SaltProvider>");
-  return ctx;
-}
-
-/** Fast-changing execution state (compiled spec + prompt). */
-export function useSaltCanvas(): SaltCanvasValue {
-  const ctx = useContext(SaltCanvasContext);
-  if (!ctx) throw new Error("useSaltCanvas must be used inside <SaltProvider>");
-  return ctx;
-}
-
-export function useSalt(): SaltContextValue {
-  const prefs = useSaltPrefs();
-  const canvas = useSaltCanvas();
-  return useMemo(() => ({ ...prefs, ...canvas }), [prefs, canvas]);
-}
 
 
 /** Color-matrix approximations of dichromatic vision (Machado et al.). */

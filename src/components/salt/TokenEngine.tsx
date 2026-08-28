@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, ShieldCheck } from "lucide-react";
 import { Panel, SegmentedControl, Pill } from "./SaltControls";
-import { useSaltPrefs } from "./SaltProvider";
+import { useSaltPrefs } from "./salt-context";
 import { CONTRAST_PAIRS, TOKEN_DICTIONARY, type TokenTier } from "@/lib/salt-tokens";
 import { contrastRatio, parseColor, readToken, toCssRgb, verdict } from "@/lib/salt-color";
 import { GenerationEngine } from "./GenerationEngine";

@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ClipboardCheck, Copy, Ear, LayoutGrid } from "lucide-react";
 import { Panel, Pill, SegmentedControl } from "./SaltControls";
-import { useSaltCanvas, useSaltPrefs } from "./SaltProvider";
+import { useSaltCanvas, useSaltPrefs } from "./salt-context";
 import {
   LIQUIDITY_FLOOR_USD_M,
   RISK_TILES,
