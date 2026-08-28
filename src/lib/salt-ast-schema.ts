@@ -142,6 +142,9 @@ function describe(err: ErrorObject): SaltViolation {
 
 /** Bounded LRU memo so repeated renders of an unchanged payload cost a map hit. */
 const MEMO_LIMIT = 32;
+/** Hard client-side payload cap — anything larger is rejected before parsing. */
+export const MAX_SPEC_PAYLOAD_CHARS = 50_000;
+
 const memo = new Map<string, SaltValidationResult>();
 
 function remember(key: string, result: SaltValidationResult): SaltValidationResult {
@@ -194,6 +197,21 @@ function runValidation(input: string, startedAt: number): SaltValidationResult {
     for (const err of compiled.errors ?? []) violations.push(describe(err));
   } else {
     passes.push("draft-07/SaltUiSpec");
+  }
+
+  // AJV covers structure; the Zod .strict() contract is the allowlist boundary.
+  // A payload is only ok when BOTH agree.
+  const contract = saltUiSpecContract.safeParse(parsed);
+  if (!contract.success) {
+    for (const issue of contract.error.issues.slice(0, 8)) {
+      violations.push({
+        rule: "salt/strict-contract",
+        detail: `SALT AST SCHEMA VALIDATION ERROR — ${issue.path.join(".") || "/"}: ${issue.message}`,
+        severity: "error",
+      });
+    }
+  } else {
+    passes.push("zod/strict-allowlist");
   }
 
   // ---- one combined governance scan -------------------------------------
@@ -307,6 +325,25 @@ function runValidation(input: string, startedAt: number): SaltValidationResult {
 /** Memoized AST validation entry point. Repeat payloads resolve from cache. */
 export function validateSaltSpec(input: string): SaltValidationResult {
   const startedAt = now();
+  if (input.length > MAX_SPEC_PAYLOAD_CHARS) {
+    return {
+      ok: false,
+      violations: [
+        {
+          rule: "salt/payload-cap",
+          detail: `SALT AST SCHEMA VALIDATION ERROR — payload of ${input.length} characters exceeds the ${MAX_SPEC_PAYLOAD_CHARS}-character safety cap and was rejected without parsing`,
+          severity: "error",
+        },
+      ],
+      passes: [],
+      cssPropertyCount: 0,
+      offGrid: [],
+      tokensResolved: 0,
+      tokensExpected: 0,
+      validationMs: now() - startedAt,
+      memoized: false,
+    };
+  }
   const cached = memo.get(input);
   if (cached) return { ...cached, validationMs: now() - startedAt, memoized: true };
   return remember(input, runValidation(input, startedAt));
