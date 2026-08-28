@@ -1,11 +1,15 @@
-export type TokenTier = "primitive" | "semantic" | "component";
+import {
+  assertContract,
+  contrastPairContract,
+  tokenEntryContract,
+  type ContrastPair,
+  type TokenEntry,
+  type TokenTier,
+} from "./salt-contracts";
+import { z } from "zod";
 
-export type TokenEntry = {
-  name: string;
-  tier: TokenTier;
-  group: string;
-  note?: string;
-};
+export type { TokenEntry, TokenTier, ContrastPair };
+
 
 export const TOKEN_DICTIONARY: TokenEntry[] = [
   { name: "--salt-palette-navy-900", tier: "primitive", group: "Palette" },
