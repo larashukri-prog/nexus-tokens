@@ -1,11 +1,15 @@
-export type TokenTier = "primitive" | "semantic" | "component";
+import {
+  assertContract,
+  contrastPairContract,
+  tokenEntryContract,
+  type ContrastPair,
+  type TokenEntry,
+  type TokenTier,
+} from "./salt-contracts";
+import { z } from "zod";
 
-export type TokenEntry = {
-  name: string;
-  tier: TokenTier;
-  group: string;
-  note?: string;
-};
+export type { TokenEntry, TokenTier, ContrastPair };
+
 
 export const TOKEN_DICTIONARY: TokenEntry[] = [
   { name: "--salt-palette-navy-900", tier: "primitive", group: "Palette" },
@@ -91,7 +95,7 @@ export const TOKEN_DICTIONARY: TokenEntry[] = [
   { name: "--salt-text-lineHeight", tier: "component", group: "Typography" },
 ];
 
-export const CONTRAST_PAIRS: { label: string; fg: string; bg: string; large?: boolean }[] = [
+export const CONTRAST_PAIRS: ContrastPair[] = [
   {
     label: "Body text on card",
     fg: "--salt-content-primary-foreground",
@@ -148,3 +152,7 @@ export const CONTRAST_PAIRS: { label: string; fg: string; bg: string; large?: bo
     bg: "--salt-table-headerBackground",
   },
 ];
+
+/* Dev-only strict-contract gate: literals above cannot drift out of contract. */
+assertContract(z.array(tokenEntryContract), TOKEN_DICTIONARY, "TOKEN_DICTIONARY");
+assertContract(z.array(contrastPairContract), CONTRAST_PAIRS, "CONTRAST_PAIRS");

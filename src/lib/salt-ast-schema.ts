@@ -4,6 +4,16 @@
  */
 import Ajv, { type ErrorObject } from "ajv";
 
+import {
+  assertContract,
+  assetRiskContract,
+  isEngineToken,
+  riskTileContract,
+  saltUiSpecContract,
+  type SaltUiSpec as SaltUiSpecShape,
+} from "./salt-contracts";
+import { z } from "zod";
+
 export const SALT_AST_SCHEMA = {
   $schema: "http://json-schema.org/draft-07/schema#",
   $id: "https://nexus-tokens.jpm/salt/ui-spec.schema.json",
@@ -64,22 +74,8 @@ export const SALT_AST_SCHEMA = {
   },
 } as const;
 
-export type SaltUiSpec = {
-  chartType: string;
-  density: "high" | "medium" | "low";
-  theme: "jpmBrand" | "chase";
-  wcagTarget: "AAA";
-  timeframe?: string;
-  riskIndicatorToken?: string;
-  complianceRules?: string[];
-  assetClasses: {
-    name: string;
-    unit?: "percent" | "usdMillions";
-    yieldData: number[];
-    saltCategoricalToken: string;
-    ariaLabel: string;
-  }[];
-};
+/** Derived from the strict Zod contract — never hand-maintained. */
+export type { SaltUiSpec, SaltAssetClass, SaltChartType } from "./salt-contracts";
 
 const ajv = new Ajv({ allErrors: true, strict: false });
 const compiled = ajv.compile(SALT_AST_SCHEMA as unknown as object);
@@ -98,10 +94,34 @@ export type SaltValidationResult = {
   offGrid: number[];
   tokensResolved: number;
   tokensExpected: number;
+  /** Measured wall-clock cost of this validation pass, in milliseconds. */
+  validationMs: number;
+  /** True when the result was served from the memo cache (near-zero cost). */
+  memoized: boolean;
 };
 
-const CSS_PROPERTY_KEYS =
-  /"(style|css|className|class|cssText|color|background|backgroundColor|boxShadow|fontFamily|padding|margin|border)"\s*:/g;
+/**
+ * Single combined scan over the serialized payload. One regex pass replaces the
+ * previous five, keeping the validator inside the <2ms AST boundary.
+ */
+const GOVERNANCE_SCAN =
+  /"(style|css|className|class|cssText|color|background|backgroundColor|boxShadow|fontFamily|padding|margin|border)"\s*:|#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\(|var\(--(?!salt-)|"[a-z]+-(?:legacy|override)"|--salt-palette-(?:navy|slate|blue|gold|teal|amber|white|black|grey|gray|red|green)(?:-\d{2,3})?\b|"(\d+)px"/g;
+
+const CSS_PROPERTY_NAMES = new Set([
+  "style",
+  "css",
+  "className",
+  "class",
+  "cssText",
+  "color",
+  "background",
+  "backgroundColor",
+  "boxShadow",
+  "fontFamily",
+  "padding",
+  "margin",
+  "border",
+]);
 
 function describe(err: ErrorObject): SaltViolation {
   const path = err.instancePath || "/";
@@ -120,13 +140,31 @@ function describe(err: ErrorObject): SaltViolation {
   };
 }
 
-export function validateSaltSpec(input: string): SaltValidationResult {
+/** Bounded LRU memo so repeated renders of an unchanged payload cost a map hit. */
+const MEMO_LIMIT = 32;
+const memo = new Map<string, SaltValidationResult>();
+
+function remember(key: string, result: SaltValidationResult): SaltValidationResult {
+  memo.set(key, result);
+  if (memo.size > MEMO_LIMIT) {
+    const oldest = memo.keys().next().value;
+    if (oldest !== undefined) memo.delete(oldest);
+  }
+  return result;
+}
+
+function now(): number {
+  return typeof performance === "undefined" ? 0 : performance.now();
+}
+
+function runValidation(input: string, startedAt: number): SaltValidationResult {
   const empty = {
     passes: [] as string[],
     cssPropertyCount: 0,
     offGrid: [] as number[],
     tokensResolved: 0,
     tokensExpected: 0,
+    memoized: false,
   };
 
   let parsed: unknown;
@@ -143,6 +181,7 @@ export function validateSaltSpec(input: string): SaltValidationResult {
           severity: "error",
         },
       ],
+      validationMs: now() - startedAt,
     };
   }
 
@@ -157,26 +196,66 @@ export function validateSaltSpec(input: string): SaltValidationResult {
     passes.push("draft-07/SaltUiSpec");
   }
 
-  const cssHits = [...flat.matchAll(CSS_PROPERTY_KEYS)].map((m) => m[1] as string);
-  if (cssHits.length) {
+  // ---- one combined governance scan -------------------------------------
+  const cssHits = new Set<string>();
+  const primitiveHits = new Set<string>();
+  const offGrid: number[] = [];
+  let rawColor = false;
+  let namespaceLeak = false;
+
+  GOVERNANCE_SCAN.lastIndex = 0;
+  for (let m = GOVERNANCE_SCAN.exec(flat); m !== null; m = GOVERNANCE_SCAN.exec(flat)) {
+    const [match, cssProp, pxValue] = m;
+    if (cssProp && CSS_PROPERTY_NAMES.has(cssProp)) {
+      cssHits.add(cssProp);
+      continue;
+    }
+    if (pxValue) {
+      const n = Number(pxValue);
+      if (n % 4 !== 0) offGrid.push(n);
+      continue;
+    }
+    if (match.startsWith("--salt-palette-")) {
+      primitiveHits.add(match);
+      continue;
+    }
+    if (match.startsWith("var(--")) {
+      namespaceLeak = true;
+      continue;
+    }
+    if (match.startsWith('"')) {
+      namespaceLeak = true;
+      continue;
+    }
+    rawColor = true;
+  }
+
+  if (cssHits.size) {
     violations.push({
       rule: "salt/no-raw-css",
-      detail: `Unapproved CSS propert${cssHits.length > 1 ? "ies" : "y"} detected: ${[
-        ...new Set(cssHits),
-      ].join(", ")}`,
+      detail: `Unapproved CSS propert${cssHits.size > 1 ? "ies" : "y"} detected: ${[...cssHits].join(", ")}`,
       severity: "error",
     });
   } else passes.push("salt/no-raw-css");
 
-  if (/#[0-9a-fA-F]{3,8}\b/.test(flat) || /rgba?\(/.test(flat)) {
+  if (rawColor) {
     violations.push({
       rule: "salt/no-raw-color",
-      detail: "Raw hex / rgb() literal found — must reference a --salt-* token",
+      detail:
+        "Raw hex / rgb() / hsl() / oklch() literal found — must reference a --salt-* semantic token",
       severity: "error",
     });
   } else passes.push("salt/no-raw-color");
 
-  if (/var\(--(?!salt-)/.test(flat) || /"[a-z]+-(?:legacy|override)"/.test(flat)) {
+  if (primitiveHits.size) {
+    violations.push({
+      rule: "salt/primitive-leak",
+      detail: `Tier-1 primitive token referenced (${[...primitiveHits].join(", ")}) — the engine may only bind semantic and component tokens`,
+      severity: "error",
+    });
+  } else passes.push("salt/primitive-leak");
+
+  if (namespaceLeak) {
     violations.push({
       rule: "salt/namespace",
       detail: "Non-Salt variable or legacy component override referenced",
@@ -184,9 +263,6 @@ export function validateSaltSpec(input: string): SaltValidationResult {
     });
   } else passes.push("salt/namespace");
 
-  const offGrid = [...flat.matchAll(/"(\d+)px"/g)]
-    .map((m) => Number(m[1]))
-    .filter((n) => n % 4 !== 0);
   if (offGrid.length) {
     violations.push({
       rule: "salt/4px-grid",
@@ -195,10 +271,10 @@ export function validateSaltSpec(input: string): SaltValidationResult {
     });
   } else passes.push("salt/4px-grid");
 
-  const spec = parsed as Partial<SaltUiSpec>;
+  const spec = parsed as Partial<SaltUiSpecShape>;
   const list = Array.isArray(spec.assetClasses) ? spec.assetClasses : [];
   const tokensResolved = list.filter((a) =>
-    /^--salt-palette-categorical-[1-6]$/.test(String(a?.saltCategoricalToken ?? "")),
+    isEngineToken(String(a?.saltCategoricalToken ?? "")),
   ).length;
 
   if (spec.chartType === "liquidityTimeline") {
@@ -219,11 +295,21 @@ export function validateSaltSpec(input: string): SaltValidationResult {
     ok: violations.filter((v) => v.severity === "error").length === 0,
     violations,
     passes,
-    cssPropertyCount: new Set(cssHits).size,
+    cssPropertyCount: cssHits.size,
     offGrid,
     tokensResolved,
     tokensExpected: list.length,
+    validationMs: now() - startedAt,
+    memoized: false,
   };
+}
+
+/** Memoized AST validation entry point. Repeat payloads resolve from cache. */
+export function validateSaltSpec(input: string): SaltValidationResult {
+  const startedAt = now();
+  const cached = memo.get(input);
+  if (cached) return { ...cached, validationMs: now() - startedAt, memoized: true };
+  return remember(input, runValidation(input, startedAt));
 }
 
 /* --------------------------------- presets -------------------------------- */
@@ -579,6 +665,22 @@ export function generateSpec(
 /** Scenario 1 is the default showcase: PE drawdowns vs the $10M IPS floor. */
 export const DEFAULT_ADVISOR_PROMPT = "UHNW Liquidity Mandate: PE Drawdowns vs $10M IPS Floor";
 
-export const DEFAULT_CANVAS_SPEC = JSON.parse(
-  generateSpec(DEFAULT_ADVISOR_PROMPT, { density: "medium", theme: "jpmBrand" }),
-) as SaltUiSpec;
+/** Parsed through the strict contract, so the default canvas cannot ship off-contract. */
+export const DEFAULT_CANVAS_SPEC: SaltUiSpecShape = saltUiSpecContract.parse(
+  JSON.parse(generateSpec(DEFAULT_ADVISOR_PROMPT, { density: "medium", theme: "jpmBrand" })),
+);
+
+/* Dev-only strict-contract gates for the design-data literals in this module. */
+assertContract(z.array(riskTileContract), RISK_TILES, "RISK_TILES");
+assertContract(z.record(assetRiskContract), ASSET_RISK, "ASSET_RISK");
+/* Dev-only guarantee: the engine can only ever emit semantic/component tokens. */
+if (import.meta.env.DEV) {
+  for (const preset of PRESETS) {
+    if (preset.hostile) continue;
+    assertContract(
+      saltUiSpecContract,
+      JSON.parse(generateSpec(preset.prompt, { density: "medium", theme: "jpmBrand" })),
+      `generateSpec("${preset.id}")`,
+    );
+  }
+}

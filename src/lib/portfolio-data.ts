@@ -1,13 +1,17 @@
-export type AssetClass = {
-  id: string;
-  name: string;
-  token: string;
-  allocation: number;
-  value: number;
-  ytd: number;
-  yield: number;
-  risk: "Low" | "Moderate" | "Elevated";
-};
+import { z } from "zod";
+
+import {
+  assertContract,
+  assetClassRowContract,
+  holdingContract,
+  kpiContract,
+  type AssetClassRow,
+  type Holding,
+} from "./salt-contracts";
+
+/** Types are derived from the strict Zod contracts — never hand-maintained. */
+export type AssetClass = AssetClassRow;
+export type { Holding };
 
 export const ASSET_CLASSES: AssetClass[] = [
   {
@@ -71,17 +75,6 @@ export const ASSET_CLASSES: AssetClass[] = [
     risk: "Low",
   },
 ];
-
-export type Holding = {
-  ticker: string;
-  name: string;
-  sleeve: string;
-  sleeveToken: string;
-  qty: number;
-  price: number;
-  marketValue: number;
-  dayChange: number;
-};
 
 export const HOLDINGS: Holding[] = [
   {
@@ -164,3 +157,8 @@ export function formatCurrency(n: number): string {
     maximumFractionDigits: 0,
   });
 }
+
+/* Dev-only strict-contract gate for the portfolio literals. */
+assertContract(z.array(assetClassRowContract), ASSET_CLASSES, "ASSET_CLASSES");
+assertContract(z.array(holdingContract), HOLDINGS, "HOLDINGS");
+assertContract(z.array(kpiContract), KPIS, "KPIS");
