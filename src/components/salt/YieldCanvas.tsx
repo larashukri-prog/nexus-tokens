@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ClipboardCheck, Copy, Ear, LayoutGrid } from "lucide-react";
 import { Panel, Pill, SegmentedControl } from "./SaltControls";
 import { useSalt } from "./SaltProvider";
@@ -28,9 +28,48 @@ function fmt(value: number, unit: Series["unit"]) {
   return unit === "usdMillions" ? `$${value.toFixed(1)}M` : `${value.toFixed(2)}%`;
 }
 
+/**
+ * Coalesces pointer moves to one commit per animation frame (~60fps) so
+ * scrubbing cannot fire a state update per mouse pixel.
+ */
+function useRafPointer(pick: (clientX: number) => void) {
+  const frame = useRef<number | null>(null);
+  const latest = useRef(0);
+  useEffect(
+    () => () => {
+      if (frame.current !== null) cancelAnimationFrame(frame.current);
+    },
+    [],
+  );
+  return useCallback(
+    (clientX: number) => {
+      latest.current = clientX;
+      if (frame.current !== null) return;
+      frame.current = requestAnimationFrame(() => {
+        frame.current = null;
+        pick(latest.current);
+      });
+    },
+    [pick],
+  );
+}
+
+/** Charts only depend on the active index and the series/label identities. */
+function sameChartProps(
+  a: { series: Series[]; labels: string[]; active: number; onActive: (i: number) => void },
+  b: { series: Series[]; labels: string[]; active: number; onActive: (i: number) => void },
+) {
+  return (
+    a.active === b.active &&
+    a.onActive === b.onActive &&
+    a.series === b.series &&
+    a.labels === b.labels
+  );
+}
+
 /* ------------------------------ stress curves ----------------------------- */
 
-function StressCurveChart({
+function StressCurveChartBase({
   series,
   labels,
   active,
@@ -59,6 +98,7 @@ function StressCurveChart({
     },
     [onActive, points],
   );
+  const onPointerMove = useRafPointer(pick);
 
   const base = series[0];
   const shock = series[1];
@@ -75,7 +115,7 @@ function StressCurveChart({
         role="img"
         tabIndex={0}
         aria-label={`Stress test curve: base portfolio yield versus 200 basis point rate shock scenario across ${labels[0]} to ${labels[labels.length - 1]}. Use left and right arrow keys to inspect each quarter.`}
-        onMouseMove={(e) => pick(e.clientX)}
+        onMouseMove={(e) => onPointerMove(e.clientX)}
         onKeyDown={(e) => {
           if (e.key === "ArrowRight") {
             e.preventDefault();
@@ -232,7 +272,7 @@ function StressCurveChart({
 
 /* --------------------------- liquidity timeline --------------------------- */
 
-function LiquidityTimelineChart({
+function LiquidityTimelineChartBase({
   series,
   labels,
   active,
@@ -269,6 +309,7 @@ function LiquidityTimelineChart({
     },
     [onActive, points, step],
   );
+  const onPointerMove = useRafPointer(pick);
 
   const callAt = calls?.yieldData[Math.min(active, calls.yieldData.length - 1)] ?? 0;
   const floorAt = floorSeries?.yieldData[Math.min(active, floorSeries.yieldData.length - 1)] ?? 0;
@@ -283,7 +324,7 @@ function LiquidityTimelineChart({
         role="img"
         tabIndex={0}
         aria-label={`Five year private equity capital call timeline against a 10 million dollar minimum Treasury liquidity threshold, ${labels[0]} to ${labels[labels.length - 1]}. Use left and right arrow keys to inspect each quarter.`}
-        onMouseMove={(e) => pick(e.clientX)}
+        onMouseMove={(e) => onPointerMove(e.clientX)}
         onKeyDown={(e) => {
           if (e.key === "ArrowRight") {
             e.preventDefault();
@@ -467,9 +508,12 @@ function LiquidityTimelineChart({
   );
 }
 
+const StressCurveChart = memo(StressCurveChartBase, sameChartProps);
+const LiquidityTimelineChart = memo(LiquidityTimelineChartBase, sameChartProps);
+
 /* ---------------------------- generic fallback ---------------------------- */
 
-function Legend({ series }: { series: Series[] }) {
+const Legend = memo(function Legend({ series }: { series: Series[] }) {
   return (
     <ul className="flex flex-wrap gap-[var(--salt-spacing-100)]">
       {series.map((s) => {
@@ -497,9 +541,9 @@ function Legend({ series }: { series: Series[] }) {
       })}
     </ul>
   );
-}
+});
 
-function RiskTiles() {
+const RiskTiles = memo(function RiskTiles() {
   return (
     <div className="grid gap-[var(--salt-spacing-200)] md:grid-cols-2 xl:grid-cols-3">
       {RISK_TILES.map((tile) => (
@@ -557,7 +601,7 @@ function RiskTiles() {
       ))}
     </div>
   );
-}
+});
 
 function screenReaderTree(spec: SaltUiSpec, labels: string[], active: number): string {
   const lines = [
@@ -595,7 +639,7 @@ export function YieldCanvas() {
   const [copied, setCopied] = useState(false);
   const [showTree, setShowTree] = useState(false);
 
-  const series = canvasSpec?.assetClasses ?? [];
+  const series = useMemo(() => canvasSpec?.assetClasses ?? [], [canvasSpec]);
   const pointCount = series.length
     ? Math.max(...series.map((s) => s.yieldData.length), 2)
     : 2;
