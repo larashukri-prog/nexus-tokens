@@ -1,20 +1,34 @@
 import { useEffect, useMemo, useState } from "react";
 import { Check, Cpu, ShieldCheck, Sparkles, TriangleAlert, Wand2 } from "lucide-react";
 import { Panel, SegmentedControl, Pill } from "./SaltControls";
-import { useSalt } from "./SaltProvider";
+import { useSaltCanvas, useSaltPrefs } from "./SaltProvider";
 import {
   DEFAULT_ADVISOR_PROMPT,
+  MAX_SPEC_PAYLOAD_CHARS,
   PRESETS,
   SALT_AST_SCHEMA,
   generateSpec,
   validateSaltSpec,
   type SaltUiSpec,
 } from "@/lib/salt-ast-schema";
+import { saltUiSpecContract } from "@/lib/salt-contracts";
 import { contrastRatio, readToken, verdict } from "@/lib/salt-color";
 
 type Tab = "form" | "spec" | "rules";
 
 const DEFAULT_PROMPT = DEFAULT_ADVISOR_PROMPT;
+
+/** Debounces a fast-changing value so heavy validation never runs per keystroke. */
+function useDebounced<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    if (Object.is(debounced, value)) return;
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, delay]);
+  return debounced;
+}
 
 function useProviderEl() {
   const [el, setEl] = useState<Element | null>(null);
@@ -45,28 +59,34 @@ function AuditRow({
 
 export function GenerationEngine() {
   const el = useProviderEl();
-  const { density, theme, mode, setDensity, setTheme, setCanvas } = useSalt();
+  const { density, theme, mode, setDensity, setTheme } = useSaltPrefs();
+  const { setCanvas } = useSaltCanvas();
   const [tab, setTab] = useState<Tab>("form");
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
   const [spec, setSpec] = useState(() =>
     generateSpec(DEFAULT_PROMPT, { density: "medium", theme: "jpmBrand" }),
   );
 
-  const result = useMemo(() => validateSaltSpec(spec), [spec]);
+  /* Validation, JSON parsing and the global canvas push only run on the
+     debounced value, so typing in the textarea stays a local state update. */
+  const debouncedSpec = useDebounced(spec, 175);
+  const result = useMemo(() => validateSaltSpec(debouncedSpec), [debouncedSpec]);
   const parsed = useMemo<Partial<SaltUiSpec>>(() => {
     try {
-      return JSON.parse(spec) as Partial<SaltUiSpec>;
+      return JSON.parse(debouncedSpec) as Partial<SaltUiSpec>;
     } catch {
       return {};
     }
-  }, [spec]);
+  }, [debouncedSpec]);
+
+  /* Hard runtime gate: only a payload that satisfies the strict Zod contract
+     may ever reach the canvas — no unchecked casts. */
+  const gated = useMemo(() => saltUiSpecContract.safeParse(parsed), [parsed]);
 
   useEffect(() => {
-    if (result.ok && Array.isArray(parsed.assetClasses) && parsed.assetClasses.length) {
-      setCanvas(parsed as SaltUiSpec, prompt);
-    }
+    if (result.ok && gated.success) setCanvas(gated.data, prompt);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [result.ok, parsed]);
+  }, [result.ok, gated]);
 
   const [contrast, setContrast] = useState<
     { label: string; ratio: number | null; grade: string }[]
@@ -228,6 +248,7 @@ export function GenerationEngine() {
           <textarea
             value={spec}
             rows={12}
+            maxLength={MAX_SPEC_PAYLOAD_CHARS}
             spellCheck={false}
             aria-label="Generated Salt JSON spec"
             onChange={(e) => setSpec(e.target.value)}

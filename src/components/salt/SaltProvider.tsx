@@ -1,4 +1,12 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+
 import {
   DEFAULT_ADVISOR_PROMPT,
   DEFAULT_CANVAS_SPEC,
@@ -10,28 +18,49 @@ export type SaltTheme = "jpm" | "chase";
 export type SaltDensity = "high" | "medium" | "low";
 export type SaltVision = "standard" | "deuteranopia" | "protanopia" | "monochromacy";
 
-type SaltContextValue = {
+type SaltPrefsValue = {
   mode: SaltMode;
   theme: SaltTheme;
   density: SaltDensity;
   vision: SaltVision;
-  /** Last spec that passed Salt AST validation and was compiled to the canvas. */
-  canvasSpec: SaltUiSpec | null;
-  canvasPrompt: string;
-  setCanvas: (spec: SaltUiSpec | null, prompt: string) => void;
   setMode: (m: SaltMode) => void;
   setTheme: (t: SaltTheme) => void;
   setDensity: (d: SaltDensity) => void;
   setVision: (v: SaltVision) => void;
 };
 
-const SaltContext = createContext<SaltContextValue | null>(null);
+type SaltCanvasValue = {
+  /** Last spec that passed Salt AST validation and was compiled to the canvas. */
+  canvasSpec: SaltUiSpec | null;
+  canvasPrompt: string;
+  setCanvas: (spec: SaltUiSpec | null, prompt: string) => void;
+};
 
-export function useSalt(): SaltContextValue {
-  const ctx = useContext(SaltContext);
-  if (!ctx) throw new Error("useSalt must be used inside <SaltProvider>");
+type SaltContextValue = SaltPrefsValue & SaltCanvasValue;
+
+const SaltPrefsContext = createContext<SaltPrefsValue | null>(null);
+const SaltCanvasContext = createContext<SaltCanvasValue | null>(null);
+
+/** Stable UI preferences only — never re-renders when the canvas spec changes. */
+export function useSaltPrefs(): SaltPrefsValue {
+  const ctx = useContext(SaltPrefsContext);
+  if (!ctx) throw new Error("useSaltPrefs must be used inside <SaltProvider>");
   return ctx;
 }
+
+/** Fast-changing execution state (compiled spec + prompt). */
+export function useSaltCanvas(): SaltCanvasValue {
+  const ctx = useContext(SaltCanvasContext);
+  if (!ctx) throw new Error("useSaltCanvas must be used inside <SaltProvider>");
+  return ctx;
+}
+
+export function useSalt(): SaltContextValue {
+  const prefs = useSaltPrefs();
+  const canvas = useSaltCanvas();
+  return useMemo(() => ({ ...prefs, ...canvas }), [prefs, canvas]);
+}
+
 
 /** Color-matrix approximations of dichromatic vision (Machado et al.). */
 function VisionFilters() {
@@ -69,39 +98,37 @@ export function SaltProvider({ children }: { children: ReactNode }) {
   const [canvasSpec, setCanvasSpec] = useState<SaltUiSpec | null>(DEFAULT_CANVAS_SPEC);
   const [canvasPrompt, setCanvasPrompt] = useState(DEFAULT_ADVISOR_PROMPT);
 
-  const value = useMemo(
-    () => ({
-      mode,
-      theme,
-      density,
-      vision,
-      canvasSpec,
-      canvasPrompt,
-      setCanvas: (spec: SaltUiSpec | null, prompt: string) => {
-        setCanvasSpec(spec);
-        setCanvasPrompt(prompt);
-      },
-      setMode,
-      setTheme,
-      setDensity,
-      setVision,
-    }),
-    [mode, theme, density, vision, canvasSpec, canvasPrompt],
+  const setCanvas = useCallback((spec: SaltUiSpec | null, prompt: string) => {
+    setCanvasSpec(spec);
+    setCanvasPrompt(prompt);
+  }, []);
+
+  const prefs = useMemo<SaltPrefsValue>(
+    () => ({ mode, theme, density, vision, setMode, setTheme, setDensity, setVision }),
+    [mode, theme, density, vision],
+  );
+
+  const canvas = useMemo<SaltCanvasValue>(
+    () => ({ canvasSpec, canvasPrompt, setCanvas }),
+    [canvasSpec, canvasPrompt, setCanvas],
   );
 
   return (
-    <SaltContext.Provider value={value}>
-      <VisionFilters />
-      <div
-        data-salt-provider=""
-        data-theme={theme}
-        data-mode={mode}
-        data-density={density}
-        data-vision={vision}
-        className="salt-text min-h-screen bg-salt-container-secondary font-salt text-salt-content-primary antialiased"
-      >
-        {children}
-      </div>
-    </SaltContext.Provider>
+    <SaltPrefsContext.Provider value={prefs}>
+      <SaltCanvasContext.Provider value={canvas}>
+        <VisionFilters />
+        <div
+          data-salt-provider=""
+          data-theme={theme}
+          data-mode={mode}
+          data-density={density}
+          data-vision={vision}
+          className="salt-text min-h-screen bg-salt-container-secondary font-salt text-salt-content-primary antialiased"
+        >
+          {children}
+        </div>
+      </SaltCanvasContext.Provider>
+    </SaltPrefsContext.Provider>
   );
+
 }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, ShieldCheck } from "lucide-react";
 import { Panel, SegmentedControl, Pill } from "./SaltControls";
-import { useSalt } from "./SaltProvider";
+import { useSaltPrefs } from "./SaltProvider";
 import { CONTRAST_PAIRS, TOKEN_DICTIONARY, type TokenTier } from "@/lib/salt-tokens";
 import { contrastRatio, parseColor, readToken, toCssRgb, verdict } from "@/lib/salt-color";
 import { GenerationEngine } from "./GenerationEngine";
@@ -25,7 +25,7 @@ function useProviderEl() {
 
 function TokenDictionary() {
   const el = useProviderEl();
-  const { mode, theme, density } = useSalt();
+  const { mode, theme, density } = useSaltPrefs();
   const [query, setQuery] = useState("");
   const [tier, setTier] = useState<"all" | TokenTier>("all");
   const [resolved, setResolved] = useState<Record<string, string>>({});
@@ -124,7 +124,7 @@ function TokenDictionary() {
 
 function ContrastInspector() {
   const el = useProviderEl();
-  const { mode, theme } = useSalt();
+  const { mode, theme } = useSaltPrefs();
   const [rows, setRows] = useState<{ label: string; ratio: number | null; grade: string }[]>([]);
 
   useEffect(() => {
@@ -187,7 +187,7 @@ function ContrastInspector() {
 /* --------------------------------- Sidebar -------------------------------- */
 
 export function TokenEngineSidebar() {
-  const { density, setDensity } = useSalt();
+  const { density, setDensity } = useSaltPrefs();
 
   return (
     <aside
