@@ -665,6 +665,11 @@ export function generateSpec(
 /** Scenario 1 is the default showcase: PE drawdowns vs the $10M IPS floor. */
 export const DEFAULT_ADVISOR_PROMPT = "UHNW Liquidity Mandate: PE Drawdowns vs $10M IPS Floor";
 
-export const DEFAULT_CANVAS_SPEC = JSON.parse(
-  generateSpec(DEFAULT_ADVISOR_PROMPT, { density: "medium", theme: "jpmBrand" }),
-) as SaltUiSpec;
+/** Parsed through the strict contract, so the default canvas cannot ship off-contract. */
+export const DEFAULT_CANVAS_SPEC: SaltUiSpecShape = saltUiSpecContract.parse(
+  JSON.parse(generateSpec(DEFAULT_ADVISOR_PROMPT, { density: "medium", theme: "jpmBrand" })),
+);
+
+/* Dev-only strict-contract gates for the design-data literals in this module. */
+assertContract(z.array(riskTileContract), RISK_TILES, "RISK_TILES");
+assertContract(z.record(assetRiskContract), ASSET_RISK, "ASSET_RISK");
