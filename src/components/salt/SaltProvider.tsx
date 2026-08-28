@@ -90,39 +90,37 @@ export function SaltProvider({ children }: { children: ReactNode }) {
   const [canvasSpec, setCanvasSpec] = useState<SaltUiSpec | null>(DEFAULT_CANVAS_SPEC);
   const [canvasPrompt, setCanvasPrompt] = useState(DEFAULT_ADVISOR_PROMPT);
 
-  const value = useMemo(
-    () => ({
-      mode,
-      theme,
-      density,
-      vision,
-      canvasSpec,
-      canvasPrompt,
-      setCanvas: (spec: SaltUiSpec | null, prompt: string) => {
-        setCanvasSpec(spec);
-        setCanvasPrompt(prompt);
-      },
-      setMode,
-      setTheme,
-      setDensity,
-      setVision,
-    }),
-    [mode, theme, density, vision, canvasSpec, canvasPrompt],
+  const setCanvas = useCallback((spec: SaltUiSpec | null, prompt: string) => {
+    setCanvasSpec(spec);
+    setCanvasPrompt(prompt);
+  }, []);
+
+  const prefs = useMemo<SaltPrefsValue>(
+    () => ({ mode, theme, density, vision, setMode, setTheme, setDensity, setVision }),
+    [mode, theme, density, vision],
+  );
+
+  const canvas = useMemo<SaltCanvasValue>(
+    () => ({ canvasSpec, canvasPrompt, setCanvas }),
+    [canvasSpec, canvasPrompt, setCanvas],
   );
 
   return (
-    <SaltContext.Provider value={value}>
-      <VisionFilters />
-      <div
-        data-salt-provider=""
-        data-theme={theme}
-        data-mode={mode}
-        data-density={density}
-        data-vision={vision}
-        className="salt-text min-h-screen bg-salt-container-secondary font-salt text-salt-content-primary antialiased"
-      >
-        {children}
-      </div>
-    </SaltContext.Provider>
+    <SaltPrefsContext.Provider value={prefs}>
+      <SaltCanvasContext.Provider value={canvas}>
+        <VisionFilters />
+        <div
+          data-salt-provider=""
+          data-theme={theme}
+          data-mode={mode}
+          data-density={density}
+          data-vision={vision}
+          className="salt-text min-h-screen bg-salt-container-secondary font-salt text-salt-content-primary antialiased"
+        >
+          {children}
+        </div>
+      </SaltCanvasContext.Provider>
+    </SaltPrefsContext.Provider>
   );
+
 }
