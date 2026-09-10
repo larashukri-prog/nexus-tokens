@@ -107,7 +107,7 @@ function StressCurveChartBase({
   const compression = shockAt - baseAt;
 
   return (
-    <div className="relative min-h-[220px] md:min-h-[260px]">
+    <div className="relative block w-full min-h-[350px]">
       <svg
         ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
@@ -318,7 +318,7 @@ function LiquidityTimelineChartBase({
   const headroom = floorAt - LIQUIDITY_FLOOR_USD_M;
 
   return (
-    <div className="relative min-h-[220px] md:min-h-[260px]">
+    <div className="relative block w-full min-h-[350px]">
       <svg
         ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
