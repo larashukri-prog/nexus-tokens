@@ -107,11 +107,13 @@ function StressCurveChartBase({
   const compression = shockAt - baseAt;
 
   return (
-    <div className="relative">
+    <div className="relative min-h-[220px] md:min-h-[260px]">
       <svg
         ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
-        className="w-full touch-none [height:auto] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-salt-info"
+        preserveAspectRatio="xMidYMid meet"
+        className="aspect-[640/240] h-auto w-full min-h-[220px] touch-none md:min-h-[260px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-salt-info"
+
         role="img"
         tabIndex={0}
         aria-label={`Stress test curve: base portfolio yield versus 200 basis point rate shock scenario across ${labels[0]} to ${labels[labels.length - 1]}. Use left and right arrow keys to inspect each quarter.`}
