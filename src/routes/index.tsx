@@ -27,7 +27,7 @@ function Index() {
   return (
     <SaltProvider>
       <SaltAppBar />
-      <div className="flex flex-col lg:flex-row">
+      <div className="flex flex-col md:flex-row">
         <TokenEngineSidebar />
         <LiveCanvas />
       </div>

@@ -192,7 +192,7 @@ export function TokenEngineSidebar() {
   return (
     <aside
       aria-label="Salt AST and Token Engine"
-      className="flex w-full shrink-0 flex-col gap-[var(--salt-spacing-200)] border-salt-container-border bg-salt-container-secondary p-[var(--salt-spacing-200)] lg:h-screen lg:w-[380px] lg:overflow-y-auto lg:border-r"
+      className="flex w-full shrink-0 flex-col gap-[var(--salt-spacing-200)] border-salt-container-border bg-salt-container-secondary p-[var(--salt-spacing-200)] md:h-screen md:w-[300px] md:overflow-y-auto md:border-r lg:w-[380px]"
     >
       <div>
         <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-salt-content-tertiary">

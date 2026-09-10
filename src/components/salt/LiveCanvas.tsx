@@ -306,7 +306,7 @@ export function LiveCanvas() {
   );
 
   return (
-    <main className="flex min-w-0 flex-1 flex-col gap-[var(--salt-spacing-200)] p-[var(--salt-spacing-200)] lg:h-screen lg:overflow-y-auto">
+    <main className="flex min-w-0 flex-1 flex-col gap-[var(--salt-spacing-200)] p-[var(--salt-spacing-200)] md:h-screen md:overflow-y-auto">
       <div className="flex flex-wrap items-end justify-between gap-[var(--salt-spacing-100)]">
         <div>
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-salt-content-tertiary">
