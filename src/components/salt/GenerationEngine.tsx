@@ -124,8 +124,8 @@ export function GenerationEngine() {
         theme: theme === "chase" ? "chase" : "jpmBrand",
       }),
     );
-    setTab("spec");
   }
+
 
   function applySpec() {
     if (parsed.density) setDensity(parsed.density);
